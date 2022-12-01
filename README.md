@@ -15,16 +15,13 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 
 *(posted with permission from my Data Science professor)*
 
-:green_book: Data Cleaning [00_introclass.ipynb](https://github.com/rebeccajohnson88/PPOL564_slides_activities/blob/main/activities/fall_22/00_introclass.ipynb)
+:green_book: [00_python_basics.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/code/00_python_basics.ipynb)
 
-:green_book: Something else
+:green_book: [01_criminal_justice_data.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/code/01_criminal_justice_data.ipynb)
 
-:green_book: Something else 
+:green_book: [02_guestworker_violations.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/code/02_guestworker_violations.ipynb)
 
-:green_book: 
-
-:green_book:
-
+:green_book: [03_doj_press_releases.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/code/03_doj_press_releases.ipynb)
 
 ---
 ### How to reach me:
