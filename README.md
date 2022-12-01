@@ -11,7 +11,7 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 
 ---
 
-### Python Examples:
+### Class Assignments (Python): 
 
 *(posted with permission from my Data Science professor)*
 
