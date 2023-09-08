@@ -1,0 +1,573 @@
+---
+title: "School-Aged Violence and Potential Impact on Proportion of Women in Public Office"
+author: Maggie Sullivan, Sharon Chuang, Shirui Zhou, Li Zheng
+date: Dec 5, 2022
+output: powerpoint_presentation
+reference_doc: Custom_Rfinal_template_group6.pptx
+---
+
+# Problem
+
+-   Despite making up roughly 50 percent of the population, as of December 2021, only five countries (Rwanda, Cuba, Nicaragua, Mexico, and the United Arab Emirates) had women holding over 50 percent of parliamentary seats in the lower or single house (IPU Parline).
+-   According to United Nations Women, "At the current rate of progress, gender parity in national legislative bodies will not be achieved before 2063."
+
+------------------------------------------------------------------------
+
+# Short Background/Literature Review
+
+-   Initially we planned to examine the relationship between online violence against women and women's political participation.
+-   However, this is an emerging data area and many data gaps remain.
+-   For example, a November Axios article highlighted the formation of a "a first-of-its-kind database" that tracked online violence against government officials (Kingson). 
+
+------------------------------------------------------------------------
+
+# Short Background/Literature Review Contd.
+
+- Instead, we pivoted to examine violence in relation to another proposed element contributing to the low numbers of women in elected office: the influence of childhood experiences.
+- For example, based on survey data from 1,600 children ages 6 to 12, researchers Bos, et al concluded that girls report less interest in running for political office than their boy peers (Bos, Angela L., et al).
+- Another study by Fox and Lawless found that even factors such as participation in school sports influences whether or not a girl says they want to run for office someday (Fox and Lawless, "Girls Just Wanna Not Run"). 
+- In a separate study, Fox and Lawless also concluded that women's ***self***-***perceived*** qualifications were statistically significant in whether women considered running for office.
+
+------------------------------------------------------------------------
+
+# Theory
+
+-   Gender socialization theory: Fox and Lawless argued that "Gender Socialization Theory" provides a framework to better understand the lack of women in politics, meaning that the traditional exclusion of women from the public sphere continues to have an impact on on current levels of representation (Fox and Lawless, "Entering the Arena?"). 
+-   Our hypothesis is that the levels of violence against girls in high school will have a negative correlation on the levels of women in politics at both the state and federal level.
+
+------------------------------------------------------------------------
+
+# Data and Method
+
+-   Data pulled from Institute for Women's Policy Research which compiles detailed data in a project titled "Status of Women in the States."
+-   2015 Violence and Safety: consists of "available state-level data on the percent of high school students experiencing harassment or bullying and dating violence, and state statutes on violence and employment, domestic violence, sexual violence, stalking, and gun ownership."
+-   2015 Political Participation: consists of "state-level data on women in congress and state legislatures; women of color in congress, state legislatures and statewide elected offices; and institutional resources."
+- Additional datasets for further analysis: 2015 education data, fips data, 2016 election data (states whose electoral votes went to the democratic candidate versus the republican candidate)
+
+```{R import libraries, message=FALSE, include=FALSE}
+library(rmarkdown)
+library(knitr)
+library(tidyverse)
+library(usmap)
+library(ggplot2)
+library(maps)
+library(maptools)
+library(ggmap)
+library(readxl)
+library(jsonlite)
+library(stargazer)
+library(plm)
+library(lmtest) 
+library(rvest)
+library(readr)
+library(tidycensus)
+library(tidyverse)
+library(viridis)
+library(sf)
+library(urbnmapr)
+library(tidyverse)
+library(viridis)
+```
+
+```{R import datasets, message=FALSE, include=FALSE}
+census_api_key("84e20d83aca23cc48de53642b2a1c1819c4e5a56")
+dating_violence <- read_csv("dataset_csv/2015 Violence-and-Safety.xlsx - Student Dating Violence State.csv")
+bullied_violence <- read_csv("dataset_csv/2015 Violence-and-Safety.xlsx - Student Harass&Bullied by State.csv")
+house_rep <- read_csv("dataset_csv/2015-political particitation.xlsx - WOC in House of Representatives.csv")
+congress <- read_csv("dataset_csv/2015-political particitation.xlsx - Women in U.S. Congress.csv")
+state_level <- read_csv("PP-DATA-FOR-DOWNLOAD-5-19 - Women in State Legislature.csv")
+resources <- read_csv("dataset_csv/2015-political particitation.xlsx - Women's Institutional Resources.csv")
+fips <- read_csv("dataset_csv/us-state-ansi-fips.csv")
+```
+
+```{R data cleaning, message=FALSE, include=FALSE}
+# Create functions to better clean and standardize state columns
+clean_state_subset <- function(df, column) {
+  states <- c("Alabama", "Alaska","Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas",
+            "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri","Montana", "Nebraska","Nevada", "New Hampshire", 
+            "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", 
+            "South Dakota","Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming")     # create states object
+  state_clean <- trimws(column, which = "right")    # trim ws from state column
+  new_df1 <- cbind(df, state_clean)   # add this as a new column
+  new_df2 <- filter(new_df1, state_clean %in% states)  # filter to states in our states object
+  new_df3 <- subset(new_df2, select = -c(state))  # drop the original state column 
+}
+
+## clean the data set of women in congress 
+colnames(congress) <- c("state", "num_women_senators", "prop_women_cong") 
+congress_1 <- clean_state_subset(congress, congress$state)
+
+## clean the data set of women in house representatives
+colnames(house_rep) <- c("state", "prop_women_house", "all_reps_count", "women_count", "white_count", "hispanic_count", "black_count", "asian/pacific_islander_count","native_american_count", "multiracial_count")  
+house_rep_1 <- clean_state_subset(house_rep, house_rep$state)
+
+## clean the datas set of women in state level
+colnames(state_level) <- c("state", "prop_women_state_sen", "prop_women_state_rep", "prop_women_state_exec", "prop_state_gov")
+state_level_1 <- clean_state_subset(state_level, state_level$state)
+
+## clean the data set of women institutional resource
+colnames(resources) <- c('state', 'campaign_training', 'women_pac', 'wom_caucus_state_chap', 'wom_commission')
+resources_1 <- clean_state_subset(resources, resources$state)
+
+## clean the data set of dating violence 
+colnames(dating_violence) <- c('state', 'female_physical_pct', 'female_physical_rank', 'male_physical_pct', 'male_physical_rank','female_sexual_pct','female_sexual_rank','male_sexual_pct','male_sexual_rank')
+dating_violence_1 <- clean_state_subset(dating_violence, dating_violence$state)
+
+## clean the data set of school bullying and violence 
+colnames(bullied_violence) <- c('state','female_bulliled_pct','female_bullied_rank','male_bullied_pct','male_bullied_rank','female_elec_pct', 'female_elec_rank','male_elec_pct','male_elec_rank','female_abs_pct','female_abs_rank','male_abs_pct','male_abs_rank')
+bullied_violence_1<- clean_state_subset(bullied_violence, bullied_violence$state)
+
+## clean the data set of fips
+colnames(fips) <- c('state', 'fips', 'abbr')
+fips_1 <- clean_state_subset(fips, fips$state)
+```
+
+```{R merging and cleaning data,echo=FALSE, message=FALSE, warnings=FALSE, include=FALSE}
+# Merge data
+df<-merge(fips_1, congress_1, by = "state_clean")
+df1<-merge(df, house_rep_1, by = "state_clean")
+df2<-merge(df1, resources_1, by = "state_clean")
+df3<-merge(df2, bullied_violence_1, by = "state_clean")
+df4<-merge(df3, dating_violence_1, by = "state_clean")
+df5<-merge(df4, state_level_1, by = "state_clean")
+
+## convert all column in pct to decimal 
+pct_to_number<- function(x){
+  x_replace_pct<-sub("%", "", x)
+  x_as_numeric<-as.numeric(x_replace_pct)
+  }
+
+col_in_pct = c('prop_women_cong', 'prop_women_house', 'female_bulliled_pct', 'male_bullied_pct', 'female_elec_pct', 'male_elec_pct', 'female_abs_pct','male_abs_pct','female_physical_pct','male_physical_pct','female_sexual_pct','male_sexual_pct', "prop_women_state_sen", "prop_women_state_rep", "prop_women_state_exec", "prop_state_gov")
+
+df6 <- apply(df5[ , col_in_pct], 2, pct_to_number)  
+
+df5[ , colnames(df5) %in% colnames(df6)] <- df6
+
+## replace all NA with 0
+df5[is.na(df5)] <-0
+
+## covert value in all columns from character to numerical
+
+df7 <- df5 %>% mutate_if(is.character, as.numeric)
+
+df7['state_clean']<-df5['state_clean']
+df7['abbr']<-df5['abbr']
+colnames(df7)[1]<-'state'
+```
+
+------------------------------------------------------------------------
+
+# Results: State-Level Distribution of Violence Data
+
+```{r visualization,echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="80%"}
+# create new variables for the difference between violence experienved by females vs males
+df7$diff_bullied_pct = df7$female_bulliled_pct - df7$male_bullied_pct
+df7$diff_e_bullied_pct = df7$female_elec_pct - df7$male_elec_pct
+df7$diff_abs_pct = df7$female_abs_pct - df7$male_abs_pct
+df7$diff_physical_pct = df7$female_physical_pct - df7$male_physical_pct
+df7$diff_sexual_pct = df7$female_sexual_pct - df7$male_physical_pct
+
+# create visuals to explore data this data 
+m1<- 
+  ggplot(df7,aes(x=reorder(state,diff_bullied_pct),y=diff_bullied_pct)) +
+  geom_col() + 
+  coord_flip() +
+  labs(x = 'difference in bullied (pct)', y = 'state')
+
+m2<- 
+  ggplot(df7,aes(x=reorder(state,diff_e_bullied_pct),y=diff_e_bullied_pct)) +
+  geom_col() + 
+  coord_flip() +
+  labs(x = 'difference in electronic bullied (pct)', y = 'state')
+
+m3<- 
+  ggplot(df7,aes(x=reorder(state,diff_abs_pct),y=diff_abs_pct)) +
+  geom_col() + 
+  coord_flip() + 
+  labs(x = 'difference in absence caused by bullying (pct)', y = 'state')
+
+m4<- 
+  ggplot(df7,aes(x=reorder(state,diff_physical_pct),y=diff_physical_pct)) +
+  geom_col() + 
+  coord_flip() +
+  labs(x = 'difference in suffering from physical dating violence (pct)', y = 'state')
+
+m5<- 
+  ggplot(df7,aes(x=reorder(state,diff_sexual_pct),y=diff_sexual_pct)) +
+  geom_col() + 
+  coord_flip() +
+  labs(x = 'difference in suffering from sexual dating violence (pct)', y = 'state')
+
+#m1
+#m2
+#m3
+#m4
+#m5
+```
+
+```{r slides first data viz, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="80%", include=TRUE}
+# Map the difference of physical dating violence between genders
+states_sf <- get_urbn_map(map = "states", sf = TRUE)
+
+state_data <- left_join(states_sf, df7, by = c("state_name"="state"))
+
+ggplot()+
+  geom_sf(state_data,
+          mapping=aes(fill=diff_physical_pct),
+          color="#ffffff",size=0.25)+
+  scale_fill_viridis(direction=-1)+
+  labs(title="state-level physical dating violence(%) distribution", fill="diff_physical_pct")+
+  geom_sf_text(data=get_urbn_labels(map='states',sf=TRUE),
+               aes(label=state_abbv),
+               size=3)
+```
+
+------------------------------------------------------------------------
+
+# Results: State-Level Distribution of Sexual Dating Violence Differences
+
+```{r slide data viz 2, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+# Map the difference of sexual dating violence between genders
+ggplot()+
+  geom_sf(state_data,
+          mapping=aes(fill=diff_sexual_pct),
+          color="#ffffff",size=0.25)+
+  scale_fill_viridis(direction=-1)+ 
+  labs(title="state-level sexual dating violence(%) distribution", fill="diff_sexual_pct")+
+  geom_sf_text(data=get_urbn_labels(map='states',sf=TRUE),
+               aes(label=state_abbv),
+               size=3)
+```
+
+```{r other data viz, fig.align="center", echo = FALSE,fig.width = 10, include=FALSE}
+# Replicate this graph for the other difference variables
+
+# ggplot()+
+#   geom_sf(state_data,
+#           mapping=aes(fill=diff_bullied_pct,color=diff_bullied_pct),
+#           color="#ffffff",size=0.25)+
+#   scale_fill_viridis(direction = -1)+
+#   labs(fill="difference in bullied (pct)")+
+#   geom_sf_text(data=get_urbn_labels(map='states',sf=TRUE),
+#                aes(label=state_abbv),
+#                size=3)
+# 
+# ggplot()+
+#   geom_sf(state_data,
+#           mapping=aes(fill=diff_e_bullied_pct),
+#           color="#ffffff",size=0.25)+
+#   scale_fill_viridis(direction = -1)+
+#   labs(fill="difference in electronic bullied (pct)")+
+#   geom_sf_text(data=get_urbn_labels(map='states',sf=TRUE),
+#                aes(label=state_abbv),
+#                size=3)
+# ggplot()+
+#   geom_sf(state_data,
+#           mapping=aes(fill=diff_abs_pct),
+#           color="#ffffff",size=0.25)+
+#   scale_fill_viridis(direction=-1)+
+#   labs(fill="difference in absence caused by bullying (pct)")+
+#   geom_sf_text(data=get_urbn_labels(map='states',sf=TRUE),
+#                aes(label=state_abbv),
+#                size=3)
+```
+
+------------------------------------------------------------------------
+
+# Results: Regression Set 1
+
+```{r first regression models, echo=FALSE, include=FALSE}
+model <- lm(prop_women_cong ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model)
+
+model_1 <- lm(prop_women_house ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model_1)
+
+df7['tot_reseouce'] = df7$campaign_training + df7$women_pac + df7$multiracial_count
+model_2 <- lm(tot_reseouce ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model_2)
+
+model_3 <- lm(prop_women_state_sen ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model_3)
+  
+model_4 <- lm(prop_women_state_rep ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model_4)
+
+model_5 <- lm(prop_women_state_exec ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model_5)
+
+model_6 <- lm(prop_state_gov ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model_6)
+```
+
+```{r first regression set table, results = 'asis', echo=FALSE, include=FALSE}
+# print the results of these models
+library(stargazer)
+models1_table <- stargazer(model, model_1, model_2, model_3, model_4, model_5, model_6,
+          type = "html",
+          style = "qje",
+          title = "Table 1: Regression Results of School-Aged Violence on Proportion of Women in Public Office",
+          dep.var.labels = c("Senate (Fed)", "House of Reps (Fed)", "Resources", "State Senate", "State House", "State Exec", "State Gov"),
+          covariate.labels = c("bullying", "online bullying", "absence caused by bullying", "physical dating violence", "sexual dating violence"),
+          omit.stat = c('rsq', 'f', "ser"),
+          align = TRUE,
+          no.space = TRUE,
+          single.row = TRUE)
+
+# models1_table
+
+## There is some significance but let's use a dotwhisker plot to see more 
+```
+
+```{r dotwhisker first regression set, echo = FALSE, include = FALSE}
+# plot all models into a single plot, with a dotted line at 0
+library(dotwhisker)
+models1_dwplot <- dwplot(list(model, model_1, model_2, model_3, model_4, model_5, model_6),
+                        vline = geom_vline(xintercept = 0,
+                                           color = "grey60",
+                                           linetype = 2)) +
+  theme_bw() +
+  #relabel_predictors(c("bullying", "online bullying", "absence caused by bullying", "physical dating violence", "sexual dating violence")) +
+  xlab("Coefficient Estimate") +
+  ylab("Independent Variable") + 
+  geom_vline(xintercept = 0, 
+             linetype = 2) +
+  labs(title = "Table 2: Regression Results of School-Aged Violence on Proportion of Women in Public Office",
+       color = "Dependent Variable") +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
+  scale_color_discrete(labels = rev(c("Senate (Fed)", "House of Reps (Fed)", "Resources", "State Senate", "State House", "State Exec", "State Gov")))
+
+# models1_dwplot
+
+## We can see that we can't fully reject the null hypothesis 
+```
+
+```{r slides dotwhisker first regression set, echo = FALSE, include = TRUE}
+models1_dwplot
+```
+
+------------------------------------------------------------------------
+
+# Results: Regression Set 2
+
+```{r second regression model design, echo=TRUE, message=FALSE, warnings=FALSE, include=FALSE}
+# Create new dependent variables based on the difference between the proportion of women in congress and men in congress so we can run these regressions again to see if that makes a difference
+prop_cong_diff= 100-2*df7$prop_women_cong
+prop_house_diff= 100-2*df7$prop_women_house
+
+model2 <- lm(prop_women_cong ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model)
+
+model2_1 <- lm(prop_cong_diff ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model_1)
+
+model2_2 <- lm(prop_women_house ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model_2)
+
+model2_3 <- lm(prop_house_diff ~ diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df7)
+#summary(model_3)
+```
+
+```{r second regression model table, echo=FALSE, warnings=FALSE, include=FALSE}
+#library(stargazer)
+stargazer(model2, model2_1, model2_2, model2_3, 
+          type = "html",
+          style = "qje",
+          title = "Table 1: Regression Results of School-Aged Violence on Proportion of Women in Public Office",
+          dep.var.labels = c("women in congress(%)", "diff in congress(%)", "women in house(%)", "diff in house(%)"),
+          covariate.labels = c("bullying", "online bullying", "absence caused by bullying", "physical dating violence", "sexual dating violence"),
+          omit.stat = c('rsq', 'f', "ser"),
+          align = TRUE,
+          no.space = TRUE,
+          single.row = TRUE,
+          out = "models2_table.html")
+
+library(webshot)
+webshot("models2_table.html", "models2_table.png")
+
+#models2_table
+
+## We see that sexual dating violence is statistically significant across the variables
+```
+
+![](models2_table.png)
+
+```{r download df7 as csv file, echo=FALSE, message=FALSE, warnings=FALSE, include=FALSE}
+
+# Dowload df7 data (for first two regression sets)
+write.csv(df7, "data_clean_df7.csv", row.names=FALSE)
+```
+
+------------------------------------------------------------------------
+
+# Results: Regression Set 3
+
+```{r load new data sets, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Since our results showed little impact, we explored other dependent variables available. 
+# For example, what if we looked at level of education? Industry? Income? Whether the state electoral college voted red or blue in the 2016 presidential elections?
+
+# download from other available data sets from the 2015 data from Institute for Women's Policy Research
+education <- read_csv("dataset_csv/education.csv")
+industry <- read_csv("dataset_csv/industry.csv")
+income <- read_csv("dataset_csv/income.csv")
+
+# download from the Federal Election Commission 
+# https://www.fec.gov/introduction-campaign-finance/election-and-voting-information/federal-elections-2016/
+pres_election <- read_csv("federalelections2016.csv")
+```
+
+```{R clean presidential data set, echo=FALSE, message=FALSE, warnings=FALSE, include=FALSE}
+## clean the presidential election 
+colnames(pres_election) <- c("state", "elec_vote_rep", "elec_vote_dem", "pop_vote_rep", "pop_vote_dem", "pop_vote_other", "pop_vote_total")
+
+pres_election_1 <- pres_election %>%
+  select(c("state", "elec_vote_rep", "elec_vote_dem"))
+
+# Create function to clean and standardize state column when acronymed (basically the same as clean_state_subset)
+clean_st_subset <- function(df, column) {
+  state_ac <- c("AL","AK","AZ", "AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY", "NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY") 
+  state_clean <- trimws(column, which = "right")    # trim ws from state column
+  new_df1 <- cbind(df, state_clean)   # add this as a new column
+  new_df2 <- filter(new_df1, state_clean %in% state_ac)  # filter to states in our states object
+  new_df3 <- subset(new_df2, select = -c(state))  # drop the original state column 
+}
+
+# apply the function
+pres_election_2 <- clean_st_subset(pres_election_1, pres_election_1$state)
+
+# turn into dummy variables
+pres_election_2$elec_vote_dem <- ifelse(is.na(pres_election_2$elec_vote_dem), 0, 1)
+pres_election_2$elec_vote_rep <- ifelse(is.na(pres_election_2$elec_vote_rep), 0, 1)
+
+# convert acronyms to full state names to be able to merge with other data 
+pres_election_2$state_clean <- c("Alabama", "Alaska","Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas",
+            "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri","Montana", "Nebraska","Nevada", "New Hampshire", 
+            "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", 
+            "South Dakota","Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming")
+
+head(pres_election_2)
+```
+
+```{R demographic variable data clean, results='asis', echo=FALSE, message=FALSE, warnings=FALSE, include=FALSE}
+# clean additional demographic variable data 
+colnames(education) <- c("state","less_hs_mwomen", "less_hs_men", "hs_women", "hs_men","some_col_wom", "some_col_men", "pct_women_ba", "pct_men_ba") 
+education_1 <- clean_state_subset(education, education$state)
+dim(education_1)
+
+colnames(industry) <- c("state", "wom_ag","wom_min", "wom_manu", "wom_transp", "wom_sales", "wom_fin_re", "wom_serv", "pct_women_gov", "tot_wom", "blank", "state2", "men_ag","men_min", "men_manu", "men_transp", "men_sales", "men_fin_re", "men_serv", "pct_men_gov", "tot_men") 
+industry_1 <- clean_state_subset(industry, industry$state)
+
+dim(industry_1)
+
+colnames(income) <- c("state", "married_kids", "married_no_kids", "w_head_kids", "w_head_no_kids", "m_head_kids", "m_head_no_kids", "na1", "na2", "na3") 
+income_1 <- clean_state_subset(income, income$state)
+
+# Merge these datasets and clean 
+df8 <- merge(education_1, industry_1, by = "state_clean")
+df9 <- merge(df8, income_1, by = "state_clean")
+df9 <- merge(pres_election_2, df9, by="state_clean")
+colnames(df9)[1] <- "state"
+df10 <- merge(df7, df9, by = "state")
+
+## convert all newly added columns in pct to decimal 
+pct_to_number<- function(x){
+  x_replace_pct<-sub("%", "", x)
+  x_as_numeric<-as.numeric(x_replace_pct)
+  }
+
+col_in_pct_1 = c('pct_women_ba', 'pct_men_ba', 'pct_women_gov', 'pct_men_gov')
+
+df11 <- apply(df10[ , col_in_pct_1], 2, pct_to_number)  
+
+df10[ , colnames(df10) %in% colnames(df11)] <- df11
+
+df10["pct_ba_diff"] = df10$pct_men_ba - df10$pct_women_ba
+df10["pct_gov_diff"] = df10$pct_men_gov - df10$pct_women_gov
+```
+
+```{r download df10 as csv file, echo=FALSE, message=FALSE, warnings=FALSE, include=FALSE}
+# Download df10 for third set of regression 
+write.csv(df10, "data_clean_df10.csv", row.names=FALSE)
+```
+
+```{R add demographic variable to the data set, echo=FALSE, message=FALSE, warnings=FALSE, include=FALSE}
+# Run models for regression set 3
+model3 <- lm(prop_cong_diff ~ pct_ba_diff + pct_gov_diff  + diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df10)
+#summary(model3) 
+
+model3_1 <- lm(prop_house_diff ~ pct_ba_diff + pct_gov_diff  + diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct, df10)
+#summary(model3_1) 
+
+model3_2 <- lm(prop_cong_diff ~  pct_ba_diff + pct_gov_diff+  diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct + elec_vote_dem, data = df10)
+
+#summary(model3_2) 
+
+model3_3 <- lm(prop_house_diff ~  pct_ba_diff + pct_gov_diff+  diff_bullied_pct + diff_e_bullied_pct + diff_abs_pct + diff_physical_pct + diff_sexual_pct + elec_vote_dem, data = df10) 
+#summary(model3_3) 
+
+# print results
+stargazer(model3_2,
+          type = "html",
+          style = "qje",
+          title = "Table 3: Regression Results of School-Aged Violence on Proportion of Women in Public Office",
+          dep.var.labels = c("Senate (Fed)", "House of Reps (Fed)", "Resources", "State Senate", "State House", "State Exec", "State Gov"),
+          covariate.labels = c("bullying", "online bullying", "absence caused by bullying", "physical dating violence", "sexual dating #violence"),
+          omit.stat = c('rsq', 'f', "ser"),
+          align = TRUE,
+          no.space = TRUE,
+          single.row = TRUE,
+          out = "model3_2.html")
+
+webshot("model3_2.html", "model3_2.png")
+```
+
+![](model3_2.png)
+
+------------------------------------------------------------------------
+
+# Interpretation of the Results
+
+-   The coefficient of difference percent in experiencing sexual dating violence is significant at 5% level on political participation (both congress and house)
+-   An increase of sexual dating violence with one percent is associated with an increase of political participation difference of 8 percent
+-   The main conclusion is that a relationship between gender gap regarding **sexual dating violence** and **gender gap** of political participation reflecting by both the congress and house female and male representative rate
+
+------------------------------------------------------------------------
+
+# Limitations
+
+-   Missing data:
+    -   The actual domestic violence number is known, because of **unreported** domestic violence
+    -   Awareness of domestic violence is growing, the total amount maybe decrease but the with the reported rate increase we still can't have the whole trend
+    -   The definition of domestic violence has changed over time. For example, **intimate partner violence** start to be notice until recent days.
+
+------------------------------------------------------------------------
+
+# Limitations
+
+-   Reversal Causation:the increasing female representatives and senator can design more policies women violence related policies
+-   Less control variable: the model's explaining power is weak, r-squared is only 0.11 after adding the control variable
+
+------------------------------------------------------------------------
+
+# Future Work
+
+-   missing data time-series analysis: trend and policy environment
+-   adding more demographic characteristic as control variables
+-   two stage least square: do the regression analysis of policy gender gap on the violence first, then the do regression of political participation on the violence
+
+------------------------------------------------------------------------
+
+# Resources and References
+
+### Data:
+
+-   <https://statusofwomendata.org/explore-the-data/download-the-data/>
+
+### Literature Review
+
+-   Bos, Angela L., et al. "100 Years of Suffrage and Girls Still Struggle to Find Their 'Fit' in Politics." PS: Political Science & Politics, vol. 53, no. 3, 2020, pp. 474--478., <https://doi.org/10.1017/s1049096520000293>.<https://www.cambridge.org/core/journals/ps-political-science-and-politics/article/abs/100-years-of-suffrage-and-girls-still-struggle-to-find-their-fit-in-politics/32F308992511C57D72E66BD15D190D55>
+-   Fox, Richard L., and Jennifer L. Lawless. "Entering the Arena? Gender and the Decision to Run for Office." American Journal of Political Science, vol. 48, no. 2, 2004, pp. 264--280., <https://doi.org/10.1111/j.0092-5853.2004.00069.x>. <https://onlinelibrary.wiley.com/doi/abs/10.1111/j.0092-5853.2004.00069.x?casa_token=Zw0hs1dj_7AAAAAA%3A6FTbDnoF2rTuPQ9iuYYpwSW4xaAjkH2jl9wUpNlSsbGLgz0c6P9-k4kyjqphFe90aHO1IcOuJRaWY20H>
+-   Fox, Richard L., and Jennifer L. Lawless. "Girls Just Wanna Not Run: The Gender Gap in Young Americans' Political Ambition" <https://www.american.edu/spa/wpi/upload/girls-just-wanna-not-run_policy-report.pdf>
+-   IPU Parline, "Monthly ranking of women in national parliaments", <https://data.ipu.org/women-ranking?month=12&year=2021>
+-   Kingson, Jennifer A. "A first-of-its-kind database tracks threats against public officials." <https://www.axios.com/2022/11/01/princeton-threats-officials-elections-harassment>
+-   UN Women, "Facts and figures: Women's leadership and political participation", <https://www.unwomen.org/en/what-we-do/leadership-and-political-participation/facts-and-figures>
