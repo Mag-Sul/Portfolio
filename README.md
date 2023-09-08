@@ -13,9 +13,11 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 
 ### Class Projects (Python and R):
 
-📗 **Real Life Leslie Knopes: Factors Contributing to the Proportion of Women Candidates for Local Office in the United States**
+📗 **Real Life Leslie Knopes: Factors Contributing to the Proportion of Women Candidates for Local Office in the United States (Python)**
 
 *Summary:* Much data and research exists about factors influencing the number of women in national politics globally but there is little understanding of these same elements at the local level. In my project, I examine which social, economic, and political factors are most relevant to predicting higher proportions of women candidates for local office in the United States. I employ a gender guessing package on candidate-level precinct returns from the 2018 elections and combine the resulting data with county-level factors related to demography, economics, election history, and reproductive healthcare. My resulting dataset provides one of the most conclusively available datasets on women running for local office in the U.S. Read the final report [here](). 
+
+*Techniques:* Least Absolute Shrinkage and Selection Operator (LASSO) regression and random forests. 
 
 - [01_data_cleaning_local_data.ipynb]()
 - [02_data_cleaning_demographic.ipynb]()
@@ -23,9 +25,16 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 - [04_merging.ipynb]()
 - [05_analysis.ipynb]()
 
-📗 []
+📗 **The Air We Breathe: Air Quality and Health Outcomes in Kentucky (Python)**
 
+*Summary*: Read the full report (co-authored with three of my classmates) [here]().
 
+*Techniques*: Linear Regression; Overleaf (LaTeX)
+
+- [01_final_data_cleaning.ipynb]()
+- [02_final_data_merging.ipynb]()
+- [03_final_data_visualization.ipynb]()
+- [04_regression.ipynb]()
 
 ### Class Assignments (Python): 
 
