@@ -7,9 +7,25 @@
 
 ### :woman_technologist: About Me:
 
-I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Georgetown University in Washington, DC. I'm also an experienced international relations professional and traveler with 20 countries and 35 states under my belt. I'm currently pursuing summer internship opportunities where data science and public interest intersect. See below for examples of my work!
+I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Georgetown University in Washington, DC. I'm also an experienced international relations professional focused on program management and communications. I'm currently open to opportunities where data science and public interest intersect. See below for examples of my work!
 
 ---
+
+### Class Projects (Python and R):
+
+📗 **Real Life Leslie Knopes: Factors Contributing to the Proportion of Women Candidates for Local Office in the United States**
+
+*Summary:* Much data and research exists about factors influencing the number of women in national politics globally but there is little understanding of these same elements at the local level. In my project, I examine which social, economic, and political factors are most relevant to predicting higher proportions of women candidates for local office in the United States. I employ a gender guessing package on candidate-level precinct returns from the 2018 elections and combine the resulting data with county-level factors related to demography, economics, election history, and reproductive healthcare. My resulting dataset provides one of the most conclusively available datasets on women running for local office in the U.S. Read the final report [here](). 
+
+- [01_data_cleaning_local_data.ipynb]()
+- [02_data_cleaning_demographic.ipynb]()
+- [03_data_cleaning_repro.ipynb]()
+- [04_merging.ipynb]()
+- [05_analysis.ipynb]()
+
+📗 []
+
+
 
 ### Class Assignments (Python): 
 
