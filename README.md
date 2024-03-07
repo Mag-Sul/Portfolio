@@ -58,13 +58,21 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 
 ### Data Visualization Projects: 
 
-:bar_chart: **Parking in DC: A Story of Millions of Red Tickets and Revenue with Unequal Enforcement on Communities of Color (Tableau and R)**
+📊 **Parking in DC: A Story of Millions of Red Tickets and Revenue with Unequal Enforcement on Communities of Color (Tableau and R)**
 
 *Summary*: Every driver dreads receiving a parking ticket on their dashboard. However, for those with ample income, this ticket is a minor inconvenience that can easily be settled. In contrast, a ticket of any amount for an individual with low-income is burdensome at minimum and may mean the choice between groceries or paying the fine. In DC, a city known for its history and present as a predominantly Black city, parking tickets are plentiful. My dashboard ([accessible here at Tablueau Public](https://public.tableau.com/views/parking_dc/Story1)) can be used to explore how the enforcement of parking tickets intersects with issues of race and income in DC in 2019, resulting in a disproportionate burden on low-income communities of color. Read the full report [here](https://github.com/Mag-Sul/Portfolio/blob/main/data_visualizations/Parking%20in%20DC/Parking%20in%20DC%20-%20Sullivan.pdf).
 
-*Techniques*: Mapping, exploratory data visualization 
+*Techniques*: Mapping, exploratory data visualization using Tableau
 
 - [parking_exploration.qmd](https://github.com/Mag-Sul/Portfolio/blob/main/data_visualizations/Parking%20in%20DC/parking_exploration.qmd)
+
+📊 **How to Stop Recreating the Wheel: Creating and saving custom ggplot themes for your organization’s brand (R)**
+
+*Summary* In this blog tutorial, I show how with `ggplot` in R, you can create a new, custom theme that integrates your organization’s brand, including color and font. You can also add your organizational logo to a plot using the packages `cowplot` and `magick`. By placing this code in a `utils.R` document in your project folder, you can easily load these custom visualization settings into new scripts. Read the blog post [here](https://medium.com/@mes440/how-to-stop-recreating-the-wheel-7246bb4d9702).
+
+*Techniques*: custom visualization themes using `ggplot`
+
+- [tutorial.qmd]()
 
 ### Class Assignments (Python): 
 
