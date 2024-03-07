@@ -15,7 +15,7 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 
 📘 **Data Science III: Just Jargon or Policy Priorities? Text Analysis of Secretary of State Remarks for the Biden and Trump Administrations (Python)**
 
-*Summary:* Public affairs materials point to both policy priorities and how we talk about those policy priorities. This is particularly relevant when comparing the priorities of presidential administrations from different political parties. I scraped 1,973 public remarks from the Office of the Secretary of State websites for the current U.S. Secretary of State Antony Blinken (Biden Administration) and his predecessor, Secretary Michael Pompeo (Trump Administration). I then conducted both exploratory and predictive analysis on these documents to understand how government public affairs materials do or do not reveal key facts about U.S. foreign policy, particularly for changes between administrations of different political parties. I found that these public remarks revealed both diplomatic "business as usual" reveal both and key policy priorities under each administration. Read the final report [here](). 
+*Summary:* Public affairs materials point to both policy priorities and how we talk about those policy priorities. This is particularly relevant when comparing the priorities of presidential administrations from different political parties. I scraped 1,973 public remarks from the Office of the Secretary of State websites for the current U.S. Secretary of State Antony Blinken (Biden Administration) and his predecessor, Secretary Michael Pompeo (Trump Administration). I then conducted both exploratory and predictive analysis on these documents to understand how government public affairs materials do or do not reveal key facts about U.S. foreign policy, particularly for changes between administrations of different political parties. I found that these public remarks revealed both diplomatic "business as usual" reveal both and key policy priorities under each administration. Read the final report [here](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Just%20Jargon%20or%20Policy%20Priorities/final_paper_ds3_mes440.pdf). 
 
 *Techniques:* Webscraping (`beautifulsoup` and `requests`), TF-IDF, Principal Component Analysis (PCA), Naive Bayes, K-Nearest Neighbors (KNN), Decision Trees/Random Forest
 
@@ -60,11 +60,11 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 
 :bar_chart: **Parking in DC: A Story of Millions of Red Tickets and Revenue with Unequal Enforcement on Communities of Color (Tableau and R)**
 
-*Summary*: Every driver dreads receiving a parking ticket on their dashboard. However, for those with ample income, this ticket is a minor inconvenience that can easily be settled. In contrast, a ticket of any amount for an individual with low-income is burdensome at minimum and may mean the choice between groceries or paying the fine. In DC, a city known for its history and present as a predominantly Black city, parking tickets are plentiful. My dashboard ([accessible here at Tablueau Public](https://public.tableau.com/views/parking_dc/Story1) can be used to explore how the enforcement of parking tickets intersects with issues of race and income in DC in 2019, resulting in a disproportionate burden on low-income communities of color. Read the full report [here]().
+*Summary*: Every driver dreads receiving a parking ticket on their dashboard. However, for those with ample income, this ticket is a minor inconvenience that can easily be settled. In contrast, a ticket of any amount for an individual with low-income is burdensome at minimum and may mean the choice between groceries or paying the fine. In DC, a city known for its history and present as a predominantly Black city, parking tickets are plentiful. My dashboard ([accessible here at Tablueau Public](https://public.tableau.com/views/parking_dc/Story1)) can be used to explore how the enforcement of parking tickets intersects with issues of race and income in DC in 2019, resulting in a disproportionate burden on low-income communities of color. Read the full report [here](https://github.com/Mag-Sul/Portfolio/blob/main/data_visualizations/Parking%20in%20DC/Parking%20in%20DC%20-%20Sullivan.pdf).
 
 *Techniques*: Mapping, exploratory data visualization 
 
-- [01_final_data_cleaning.ipynb]()
+- [parking_exploration.qmd](https://github.com/Mag-Sul/Portfolio/blob/main/data_visualizations/Parking%20in%20DC/parking_exploration.qmd)
 
 ### Class Assignments (Python): 
 
