@@ -19,11 +19,11 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 
 *Techniques:* Webscraping (`beautifulsoup` and `requests`), TF-IDF, Principal Component Analysis (PCA), Naive Bayes, K-Nearest Neighbors (KNN), Decision Trees/Random Forest
 
-- [01_scrape_blinken.ipynb]()
-- [02_scrape_pompeo.ipynb]()
-- [03_merge_datasets.ipynb]()
-- [04_text_vectorization_sos.ipynb]()
-- [05_models_sos.ipynb]()
+- [01_scrape_blinken.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Just%20Jargon%20or%20Policy%20Priorities/01_scrape_blinken.ipynb)
+- [02_scrape_pompeo.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Just%20Jargon%20or%20Policy%20Priorities/02_scrape_pompeo.ipynb)
+- [03_merge_datasets.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Just%20Jargon%20or%20Policy%20Priorities/03_merge_datasets.ipynb)
+- [04_text_vectorization_sos.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Just%20Jargon%20or%20Policy%20Priorities/04_text_vectorization_sos.ipynb)
+- [05_models_sos.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Just%20Jargon%20or%20Policy%20Priorities/05_models_sos.ipynb)
   
 📘 **Data Science II: Real Life Leslie Knopes: Factors Contributing to the Proportion of Women Candidates for Local Office in the United States (Python)**
 
