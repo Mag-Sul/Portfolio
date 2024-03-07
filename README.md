@@ -56,6 +56,8 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 - [03_final_data_visualization.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/The%20Air%20We%20Breathe/03_final_data_visualization.ipynb)
 - [04_regression.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/The%20Air%20We%20Breathe/04_regression.ipynb)
 
+---
+
 ### Data Visualization Projects: 
 
 📊 **Parking in DC: A Story of Millions of Red Tickets and Revenue with Unequal Enforcement on Communities of Color (Tableau and R)**
@@ -73,6 +75,8 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 *Techniques*: custom visualization themes using `ggplot`
 
 - [tutorial.qmd](https://github.com/Mag-Sul/Portfolio/blob/main/data_visualizations/How%20to%20Stop%20Recreating%20the%20Wheel/tutorial.qmd)
+
+---
 
 ### Class Assignments (Python): 
 
