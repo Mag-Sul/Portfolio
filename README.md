@@ -1,4 +1,4 @@
-[final_paper_ds3_mes440.pdf](https://github.com/Mag-Sul/Portfolio/files/14527574/final_paper_ds3_mes440.pdf)# Portfolio
+# Portfolio
 
 <h1>
  Welcome!
@@ -55,6 +55,16 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 - [02_final_data_merging.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/The%20Air%20We%20Breathe/02_final_data_merging.ipynb)
 - [03_final_data_visualization.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/The%20Air%20We%20Breathe/03_final_data_visualization.ipynb)
 - [04_regression.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/The%20Air%20We%20Breathe/04_regression.ipynb)
+
+### Data Visualization Projects: 
+
+:bar_chart: **Parking in DC: A Story of Millions of Red Tickets and Revenue with Unequal Enforcement on Communities of Color (Tableau and R)**
+
+*Summary*: Every driver dreads receiving a parking ticket on their dashboard. However, for those with ample income, this ticket is a minor inconvenience that can easily be settled. In contrast, a ticket of any amount for an individual with low-income is burdensome at minimum and may mean the choice between groceries or paying the fine. In DC, a city known for its history and present as a predominantly Black city, parking tickets are plentiful. My dashboard ([accessible here at Tablueau Public](https://public.tableau.com/views/parking_dc/Story1) can be used to explore how the enforcement of parking tickets intersects with issues of race and income in DC in 2019, resulting in a disproportionate burden on low-income communities of color. Read the full report [here]().
+
+*Techniques*: Mapping, exploratory data visualization 
+
+- [01_final_data_cleaning.ipynb]()
 
 ### Class Assignments (Python): 
 
