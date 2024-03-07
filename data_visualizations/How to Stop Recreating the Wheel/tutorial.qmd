@@ -1,0 +1,318 @@
+---
+title: "How to Stop Recreating the Wheel:"
+subtitle: "Creating and saving custom ggplot themes for your organization's brand"
+author: 'Maggie Sullivan'
+format: 
+  html:
+    embed-resources: true
+editor: visual
+execute: 
+  warning: false
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+---
+
+**TLDR:** *With ggplot, you can create a new, custom theme that integrates your organization's brand, including color and font. You can also add your organizational logo to a plot using the packages `cowplot` and `magick`. By placing this code in a `utils.R` document in your project folder, you can easily load these custom visualization settings into new scripts.*
+
+In the world of data visualization, you may often find yourself spending countless amounts of time tweaking your plot to fit your organization's specific style or branding. While you could keep a cheat sheet nearby in order to help customize your graph each time, this is still akin to recreating the wheel. This tutorial is designed to simplify the process and reduce the amount of time you spend customizing visualizations by creating and saving a custom theme and other brand-related functions for use in multiple projects. For this tutorial, I walk through the process using `ggplot` in R, but here's a great [blog tutorial by Adam Ross Nelson](https://levelup.gitconnected.com/easily-replicate-your-company-palette-for-python-data-viz-426b7487d5e4) for integrating your companies brand into data visualizations with Python instead.
+
+For this tutorial, I'll be creating a custom theme based on the U.S. Agency for International Development (USAID) Graphic Standards Manual and Partner Co-Branding Guide, publicly accessible at <https://www.usaid.gov/branding>.
+
+[![Figure 1: USAID Graphic Standards Manual and Partner Co-Branding Guide (Updated February 2020)](images/cover.png){fig-alt="An image of the title page of USAID's Graphic Standards Manual and Partner Co-Branding Guide"}](https://www.usaid.gov/branding)
+
+A quick glance at this guide's table of contents (pictured below) shows that, while detailed, this guide does not contain specific data visualization guidelines. However, it does include information about font, color, and logo usage that we can use to customize our plots.
+
+[![Figure 2: Table of Contents](images/table_of_contents.png){fig-alt="An image of the table of contents page of USAID's Graphic Standards Manual and Partner Co-Branding Guide"}](https://www.usaid.gov/branding)
+
+First, let's start with the following dataframe.
+
+```{r}
+df <- data.frame(year = c('2015','2016','2017','2018','2019','2020'),
+                 funding = c(12000, 15000, 17500, 12000, 13000, 10000))
+```
+
+Next, let's create a simple, basic line graph. We'll refine it more to fit the USAID brand in a second.
+
+```{r}
+# load ggplot
+library(ggplot2)
+
+# create the plot
+plot <- ggplot(data = df, aes(x = year, y = funding, group = 1)) + 
+  geom_line(linewidth = 0.75) + # this changes the size of the line
+  labs(title = 'Funding by Year (2015-2020)',
+       subtitle = 'Funding peaked in 2017',
+       caption = 'Source: CredibleDataSource.com',
+       x = 'Year',
+       y = 'Funding ($)') + 
+  # center the title and subtitle and adjust text sizes
+  theme(plot.title = element_text(size = 20, hjust = 0.5), 
+        plot.subtitle = element_text(size = 14, hjust = 0.5),
+        plot.caption = element_text(size = 8),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 8))
+
+plot
+```
+
+## Select a Base Theme
+
+This is a pretty basic graph. Let's examine the style of USAID's branding guide to see if there's a `ggplot` base theme that most closely matches the aesthetics of USAID's brand. We could completely design a custom theme from scratch, but building off a current theme allows us to avoid recreating the wheel.
+
+[![Figure 3: Fact Sheet Examples](images/templates.png){fig-alt="An image of the templates page of USAID's Graphic Standards Manual and Partner Co-Branding Guide."}](https://www.usaid.gov/branding)
+
+[![Figure 4: Website Examples](images/website.png){fig-alt="An image of the website examples page of USAID's Graphic Standards Manual and Partner Co-Branding Guide."}](https://www.usaid.gov/branding)
+
+It looks like the graphic design examples for fact sheets and the website use clean and minimal design features with sans-serif fonts. Looking at the pre-set ggplot themes (see [here](https://ggplot2.tidyverse.org/reference/ggtheme.html) for a full list of ggplot themes), `theme_minimal()` `theme_classic()` or `theme_light()` would be a good place to start as these have white backgrounds and minimal design elements. For this tutorial, let's use `theme_minimal()` as a base. Notice below that I place `theme_minimal()` *before* customizing the text size or position. This ensures that my custom edits are not overwritten by the standard theme if they differ.
+
+```{r}
+plot <- ggplot(data = df, aes(x = year, y = funding, group = 1)) + 
+  theme_minimal() +
+  geom_line(linewidth = 0.75) + 
+  labs(title = 'Funding by Year (2015-2020)',
+       subtitle = 'Funding peaked in 2017',
+       caption = 'Source: Credible Data Source',
+       x = 'Year',
+       y = 'Funding ($)') + 
+  theme(plot.title = element_text(size = 20, hjust = 0.5), 
+        plot.subtitle = element_text(size = 14, hjust = 0.5), 
+        plot.caption = element_text(size = 8),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 8))
+
+plot
+```
+
+This is already looking better.
+
+## Add Your Brand's Colors
+
+Now, let's look at the exact color specified in the branding guide. It looks like USAID primarily uses the colors "USAID BLUE" (Pantone 294, #002F6C) or "USAID RED" (Pantone 200, #BA0C2F). For our graph, let's make the line red and the main text blue, with the axis ticks a secondary color "DARK GRAY" (Pantone 2334, #6C6463) from the guide.
+
+[![Figure 5: USAID Colors](images/colors.png){fig-alt="An image of the colors page of USAID's Graphic Standards Manual and Partner Co-Branding Guide."}](https://www.usaid.gov/branding)
+
+```{r}
+plot <- ggplot(data = df, aes(x = year, y = funding, group = 1)) + 
+  theme_minimal() +
+  geom_line(linewidth = 0.75, color = '#BA0C2F') + 
+  labs(title = 'Funding by Year (2015-2020)',
+       subtitle = 'Funding peaked in 2017',
+       caption = 'Source: Credible Data Source',
+       x = 'Year',
+       y = 'Funding ($)') + 
+  theme(title = element_text(color = '#002F6C'), 
+        # this sets the plot title, axis titles, and legend titles to the same color. 
+        # We could alternatively specify them separately like we did with text size.
+        plot.title = element_text(size = 20, hjust = 0.5), 
+        plot.subtitle = element_text(size = 14, hjust = 0.5),
+        plot.caption = element_text(size = 8),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 8, color = '#6C6463')) 
+
+plot
+```
+
+Success! We created a line chart that incorporates the colors from the USAID branding guide.
+
+## Add Your Brand's Fonts
+
+Next, we'll customize the font to fit the typeface identified in the branding guide: "Gill Sans."
+
+[![Figure 6: USAID Typefaces](images/fonts.png){fig-alt="An image of the fonts page of USAID's Graphic Standards Manual and Partner Co-Branding Guide."}](https://www.usaid.gov/branding)
+
+This is a bit more complicated and may require a different approach. First, I'll use the [grDevices package](https://www.rdocumentation.org/packages/grDevices/versions/3.6.2) to check what fonts I have available.
+
+```{r, eval=FALSE}
+library(grDevices)
+library(extrafont)
+
+# This step is simple if the font exists on your computer and is ttf or type1 font (Mac)
+
+font_import() # this imports all standard fonts 
+fonttable()  # this displays the fonts and file location for all the fonts we just imported 
+loadfonts() # this loads all the fonts we just imported
+
+# this will only work on a Mac for type1 or ttf fonts, not ttc like Gill Sans 
+# (based on a manual review of my local fonts folder)
+font_addpackage('GillSans') 
+```
+
+Based on a manual review, it looks like only ttf or type1 fonts are listed and Gill Sans is saved to my local fonts folder as a ttc font. I found this [Stack Overflow post helpful](https://stackoverflow.com/questions/66847825/how-to-install-macos-system-truetype-collection-fonts-into-r) for troubleshooting loading a ttc font.
+
+```{r}
+# Since Gill Sans is a ttc font, I'll use the following approach
+library(showtext) # Note - this masks font_install from extrafont
+
+# add the font (include the file path location of the font)
+font_add(family = "gillsans", 
+         regular = "/System/Library/Fonts/Supplemental/GillSans.ttc")
+showtext_auto()
+```
+
+Now let's add this font to our plot.
+
+```{r}
+plot <- ggplot(data = df, aes(x = year, y = funding, group = 1)) + 
+  theme_minimal() +
+  geom_line(linewidth = 0.75, color = '#BA0C2F') + 
+  labs(title = 'Funding by Year (2015-2020)',
+       subtitle = 'Funding peaked in 2017',
+       caption = 'Source: Credible Data Source',
+       x = 'Year',
+       y = 'Funding ($)') + 
+  theme(title = element_text(color = '#002F6C'), 
+        plot.title = element_text(size = 20, hjust = 0.5), 
+        plot.subtitle = element_text(size = 14, hjust = 0.5),
+        plot.caption = element_text(size = 8),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 8, color = '#6C6463'),
+        # this sets all text elements to Gill Sans. 
+        # We could alternatively specify them separately.
+        text = element_text(family = "gillsans")) 
+
+plot
+```
+
+Success! This worked.
+
+## Add Your Logo
+
+Finally, let's add the USAID logo. Based on the branding guide, it looks like we should use the two-color logo with a white background.
+
+[![Figure 7: USAID Logos](images/logo_page.png){fig-alt="An image of the logos page of USAID's Graphic Standards Manual and Partner Co-Branding Guide."}](https://www.usaid.gov/branding)
+
+```{r}
+library(cowplot)
+library(magick)
+
+# load an image saved locally
+usaid_logo <- image_read('/Users/maggiesullivan/Documents/y2s1/data_viz/tutorial/Horizontal_RGB_294_Vector.ai')
+
+plot <- ggplot(data = df, aes(x = year, y = funding, group = 1)) + 
+  theme_cowplot() +
+  theme_minimal() +
+  geom_line(linewidth = 0.75, color = '#BA0C2F') + 
+  # adding \n creates a space that nicely adds some margins to the texts - this is optional
+  labs(title = '\n Funding by Year (2015-2020)',
+       subtitle = 'Funding peaked in 2017 \n',
+       caption = 'Source: Credible Data Source',
+       x = '\n Year',
+       y = 'Funding ($)\n') + 
+  theme(title = element_text(color = '#002F6C'), 
+        plot.title = element_text(size = 20, hjust = 0.5), 
+        plot.subtitle = element_text(size = 14, hjust = 0.5),
+        plot.caption = element_text(size = 8),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 8, color = '#6C6463'),
+        text = element_text(family = "gillsans")) 
+
+logo_plot <- ggdraw() +
+  # these specify the position on the graph
+  draw_image(usaid_logo, x = -0.375, y = 0.45 , scale = 0.2) +   
+  draw_plot(plot)
+
+logo_plot 
+
+```
+
+## Save Your Custom Visualization Elements for Future Use
+
+Now we have a custom theme that integrates our brand for any new plot we create in this script. However, to use this theme in a new project or add the logo, I'll have to redefine these at the beginning of each new script. There are a few alternatives to avoid this and simplify customizations.
+
+For a simple way to work locally, I can create a `utils.R` file saved to the same folder as my project. Then each time I create a new script, I'll import the file with the themes and functions. This is particularly helpful if, say, you are a consultant who often has to create plots for multiple different clients with different branding requests. Thus, you can create a `utils.R` file for each client and load as necessary.
+
+However, if you are working for a single organization or in a situation where loading an extra file to your project is not the best solution, the online experts recommend creating a custom R package. There are many resources online to accomplish this, so for this tutorial I'll focus on the `utils.R` approach.
+
+In order to load our custom theme and settings, let's turn these into user-defined functions saved in a `utils.R` file. The following code would be placed in this file.
+
+```{r}
+# utils.R 
+
+# load necessary libraries
+library(magick)
+library(cowplot)
+library(ggplot2)
+library(showtext)
+
+# define our custom theme
+theme_usaid <- theme_cowplot() +
+  theme_minimal() +
+  theme(title = element_text(color = '#002F6C'), 
+        plot.title = element_text(size = 20, hjust = 0.5), 
+        plot.subtitle = element_text(size = 14, hjust = 0.5),
+        plot.caption = element_text(size = 8),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 8, color = '#6C6463'),
+        text = element_text(family = "gillsans"),
+        line = element_line(linewidth = 0.75, color = '#BA0C2F'))  
+
+# define the logo 
+usaid_logo <- image_read('/Users/maggiesullivan/Documents/y2s1/data_viz/tutorial/Horizontal_RGB_294_Vector.ai')
+
+# create a function which adds the USAID logo to a plot
+add_usaid_logo_plot <- function(plot, x_position, y_position, scale_value) {
+  ggdraw() +
+  draw_image(usaid_logo, x = x_position, y = y_position , scale = scale_value) + 
+  draw_plot(plot)
+}
+
+```
+
+Now that we have our `utils.R` document, we can load these in a new document using `source()`. See the code below to recreate the work we've done so far in this tutorial, but in a new script.
+
+```{r}
+# load the utils
+source('utils.R')
+
+# create our dataset
+df <- data.frame(year = c('2015','2016','2017','2018','2019','2020'),
+                 funding = c(12000, 15000, 17500, 12000, 13000, 10000))
+
+# create a test plot with this custom theme
+test_plot <- ggplot(data = df, aes(x = year, y = funding, group = 1)) + 
+  labs(title = '\n Funding by Year (2015-2020)',
+       subtitle = 'Funding peaked in 2017 \n',
+       caption = 'Source: Credible Data Source',
+       x = '\n Year',
+       y = 'Funding ($)\n') + 
+  geom_line(size = 0.75, color = '#BA0C2F') +
+  theme_usaid    # our custom theme
+
+# add a logo to the test plot above
+test_logo_plot <- add_usaid_logo_plot(plot = test_plot, x_position = -0.375, 
+                                      y_position = 0.45, scale_value = 0.2)
+
+test_logo_plot
+```
+
+We were able to successfully customize our plot using the functions and custom theme imported in the `utils.R` document. We can apply these themes and logo functions to multiple different types of datasets and plots.
+
+```{r}
+# a new dataframe
+df_test <- data.frame(year = c('2010','2011','2012','2013','2014','2015'),
+                 funding = c(1000, 1300, 1200, 1800, 2000, 3000))
+
+# a bar plot with our theme and logo function 
+bar_plot <- ggplot(data = df_test, aes(x = year, y = funding, group = 1)) + 
+  labs(title = '\n Funding by Year (2010-2015)',
+       subtitle = 'Funding steadily increasing \n',
+       caption = 'Source: Credible Data Source',
+       x = '\n Year',
+       y = 'Funding ($)\n') + 
+  geom_bar(stat = 'identity', fill = '#BA0C2F') +
+  theme_usaid
+
+bar_plot_logo <- add_usaid_logo_plot(plot = bar_plot, x_position = -0.375, 
+                                     y_position = 0.45, scale_value = 0.2)
+
+bar_plot_logo
+```
+
+Note that this tutorial is just a beginning to the types of custom themes or functions you can create to incorporate your organization's brand into your plots. Check out a few helpful resources below for additional customization:
+
+## Other resources
+
+-   Branding tips (particularly for color palettes) in R: <https://rfortherestofus.com/2022/02/data-viz-org-branding>
+
+-   Branding tips (particularly for color palettes) in Python: <https://levelup.gitconnected.com/easily-replicate-your-company-palette-for-python-data-viz-426b7487d5e4>
+
+-   Overall branding tips for multiple coding languages or platforms: <https://medium.com/data-science-at-microsoft/its-all-yours-the-why-and-how-of-visualization-branding-183b6feda8db>
