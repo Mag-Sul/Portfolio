@@ -1,4 +1,4 @@
-# Portfolio
+[final_paper_ds3_mes440.pdf](https://github.com/Mag-Sul/Portfolio/files/14527574/final_paper_ds3_mes440.pdf)# Portfolio
 
 <h1>
  Welcome!
@@ -13,6 +13,18 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 
 ### Class Research (Python and R):
 
+📘 **Data Science III: Just Jargon or Policy Priorities? Text Analysis of Secretary of State Remarks for the Biden and Trump Administrations (Python)**
+
+*Summary:* Public affairs materials point to both policy priorities and how we talk about those policy priorities. This is particularly relevant when comparing the priorities of presidential administrations from different political parties. I scraped 1,973 public remarks from the Office of the Secretary of State websites for the current U.S. Secretary of State Antony Blinken (Biden Administration) and his predecessor, Secretary Michael Pompeo (Trump Administration). I then conducted both exploratory and predictive analysis on these documents to understand how government public affairs materials do or do not reveal key facts about U.S. foreign policy, particularly for changes between administrations of different political parties. I found that these public remarks revealed both diplomatic "business as usual" reveal both and key policy priorities under each administration. Read the final report [here](). 
+
+*Techniques:* Webscraping (`beautifulsoup` and `requests`), TF-IDF, Principal Component Analysis (PCA), Naive Bayes, K-Nearest Neighbors (KNN), Decision Trees/Random Forest
+
+- [01_scrape_blinken.ipynb]()
+- [02_scrape_pompeo.ipynb]()
+- [03_merge_datasets.ipynb]()
+- [04_text_vectorization_sos.ipynb]()
+- [05_models_sos.ipynb]()
+  
 📘 **Data Science II: Real Life Leslie Knopes: Factors Contributing to the Proportion of Women Candidates for Local Office in the United States (Python)**
 
 *Summary:* Much data and research exists about factors influencing the number of women in national politics globally but there is little understanding of these same elements at the local level. In my project, I examine which social, economic, and political factors are most relevant to predicting higher proportions of women candidates for local office in the United States. I employ a gender guessing package on candidate-level precinct returns from the 2018 elections and combine the resulting data with county-level factors related to demography, economics, election history, and reproductive healthcare. My resulting dataset provides one of the most conclusively available datasets on women running for local office in the U.S. Read the final report [here](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Real%20Life%20Leslie%20Knopes/Real%20Life%20Leslie%20Knopes_%20Factors%20Contributing%20to%20the%20Proportion%20of%20Women%20Candidates%20for%20Local%20Office%20in%20the%20United%20States%20-%20Sullivan.pdf). 
