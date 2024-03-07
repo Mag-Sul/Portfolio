@@ -1,0 +1,571 @@
+---
+title: "Parking and Data"
+author: "Maggie Sullivan"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(magrittr)
+library(sf)
+library(ggplot2)
+```
+
+
+```{r}
+#| echo: false
+jan <- read.csv('data/Parking_Violations_Issued_in_January_2019.csv')
+feb <- read.csv('data/Parking_Violations_Issued_in_February_2019.csv')
+march <- read.csv('data/Parking_Violations_Issued_in_March_2019.csv')
+april <- read.csv('data/Parking_Violations_Issued_in_April_2019.csv')
+may <- read.csv('data/Parking_Violations_Issued_in_May_2019.csv')
+june <- read.csv('data/Parking_Violations_Issued_in_June_2019.csv')
+july <- read.csv('data/Parking_Violations_Issued_in_July_2019.csv')
+aug <- read.csv('data/Parking_Violations_Issued_in_August_2019.csv')
+sep <- read.csv('data/Parking_Violations_Issued_in_September_2019.csv')
+oct <- read.csv('data/Parking_Violations_Issued_in_October_2019.csv')
+nov <- read.csv('data/Parking_Violations_Issued_in_November_2019.csv')
+dec <- read.csv('data/Parking_Violations_Issued_in_December_2019.csv')
+#test_df <- read.csv('parking_clean_jan21.csv')
+```
+
+```{r}
+# explore 
+head(jan)
+dim(jan)
+
+dfs <- c(jan,feb,march, april, may, june, july, aug, sep, oct, nov, dec)
+
+# for (i in dfs){
+#   dim(i)
+# }
+
+dim(jan)
+dim(feb)
+dim(march)
+dim(april)
+dim(may)
+dim(june)
+dim(july) # 31 cols start
+dim(aug)
+dim(sep)
+dim(oct)
+dim(nov)
+dim(dec)
+
+july2 <- subset(july, select = -VIOLATION_TYPE_DESC) 
+aug2 <- subset(aug, select = -VIOLATION_TYPE_DESC) 
+sep2 <- subset(sep, select = -VIOLATION_TYPE_DESC) 
+oct2 <- subset(oct, select = -VIOLATION_TYPE_DESC) 
+nov2 <- subset(nov, select = -VIOLATION_TYPE_DESC) 
+dec2 <- subset(dec, select = -VIOLATION_TYPE_DESC) 
+
+# dec %>%
+#   select(which(!(colnames(dec) %in% colnames(jan)))) 
+# VIOLATION_TYPE_DESC
+
+# unique(dec$VIOLATION_TYPE_DESC)
+# head(dec)
+
+# combine into on df 
+parking <- rbind(jan,feb,march, april, may, june, july2, aug2, sep2, oct2, nov2, dec2)
+head(parking)
+dim(parking) # 1,518,770 x 30
+```
+
+
+```{r}
+# clean full parking data 
+
+# create a cleaned date column
+parking$issue_date_clean <- as.Date(parking$ISSUE_DATE) 
+head(parking)
+str(parking)
+
+# create a quadrant column
+parking$quad <- ifelse(grepl('NW', parking$LOCATION)==TRUE, 'NW', 
+                       ifelse(grepl('SW', parking$LOCATION)==TRUE, 'SW', 
+                              ifelse(grepl('NE', parking$LOCATION)==TRUE,'NE', 
+                                     ifelse(grepl('SE', parking$LOCATION)==TRUE, 'SE', 'Not Specified'
+                         ))))
+
+# head(parking)
+
+## check the not specified addresses
+# parking %>%
+#   filter(parking$quad == 'Not Specified')
+
+# check the breakdown 
+test <- parking %>% 
+  group_by(quad) %>% 
+  summarise(total_count=n(),.groups = 'drop') %>%
+  as.data.frame()
+# test
+
+# check check the amount of fine
+test2 <- parking %>% 
+  group_by(VIOLATION_PROC_DESC) %>% 
+  summarise(total_count=n(),.groups = 'drop') %>%
+  as.data.frame()
+# test2
+
+# create small df
+parking_sm <- parking %>%
+  select(c(TICKET_NUMBER, ISSUING_AGENCY_CODE,ISSUING_AGENCY_NAME, VIOLATION_CODE,VIOLATION_PROC_DESC,LOCATION,FINE_AMOUNT,issue_date_clean, quad, LATITUDE, LONGITUDE))
+
+# head(parking_sm)
+
+# check na
+sapply(parking_sm, function(x) sum(is.na(x)))
+
+# drop na
+parking_sm <- parking_sm %>%
+  na.omit()
+
+# check by fine amount
+fines <- parking_sm %>%
+  group_by(FINE_AMOUNT) %>% 
+  summarise(total_count=n(),.groups = 'drop') %>%
+  as.data.frame()
+# fines
+
+# parking_sm %>%
+#   filter(quad %in% c('NW','SW'))
+
+# add day column
+parking_sm$day <- format(parking_sm$issue_date_clean, format = '%d')
+
+# head(parking_sm)
+
+# add day of week column
+parking_sm$day_of_week <- weekdays(parking_sm$issue_date_clean)
+
+# head(parking_sm)
+# table(parking_sm$day_of_week)
+
+#write.csv(parking_sm, 'parking_clean_2019.csv', row.names = FALSE)
+```
+
+```{r}
+# load census data
+library(tidycensus)
+census_api_key("b86b6310bb5bacc64b8df081ef1167d71c2359ff", install = TRUE)
+readRenviron("~/.Renviron")
+
+vars <- load_variables(2019, 'acs5')
+View(vars)
+
+# create function to call variables 
+get_many_variables <- function(var_list, sum_var) {
+  df <- get_acs(
+    geography = 'tract',
+    state = 11,
+    variables = var_list,
+  summary_var = sum_var,
+  survey = 'acs5',
+  year = 2019
+  )
+  df
+}
+
+get_one_variable <- function(var_list) {
+  df <- get_acs(
+    geography = 'tract',
+    state = 11,
+    variables = var_list,
+  survey = 'acs5',
+  year = 2019
+  )
+  df
+}
+
+```
+
+```{r}
+## GET CENSUS TRACT DATA 
+
+# race 
+race_variables = c(tot_white = 'B02001_002', 
+                tot_black = 'B02001_003',
+                tot_AIAN = 'B02001_004',
+                tot_asian = 'B02001_005',
+                tot_NHPI = 'B02001_006',
+                tot_other_race = 'B02001_007',
+                tot_2more = 'B02001_008')
+
+race_sv = 'B02001_001'
+race = get_many_variables(race_variables, race_sv)
+# head(race)
+
+# ethnicity (race-based?)
+eth_race_variables = c(tot_nothisp_race = 'B03002_002',
+                       tot_hisp_race = 'B03002_012')
+eth_race_sv = 'B03002_001'
+eth_race <- get_many_variables(eth_race_variables, eth_race_sv)
+head(eth_race)
+
+# ethnicity (origin)
+eth_origin_variables <- c(tot_nothisp_origin = 'B03003_002', 
+                         tot_hisp_origin = 'B03003_003')
+eth_origin_sv <- 'B03003_001'
+eth_origin <- get_many_variables(eth_origin_variables, eth_origin_sv)
+head(eth_origin)
+
+# transportation time
+tt_variables = c(tottt_10less = 'B08134_002',
+                tottt_10_14 = 'B08134_003', 
+                tottt_15_19 = 'B08134_004',
+                tottt_20_24 = 'B08134_005', 
+                tottt_25_29 = 'B08134_006',
+                tottt_30_34 = 'B08134_007', 
+                tottt_25_44 = 'B08134_008',
+                tottt_45_59 = 'B08134_009',
+                tottt_60more = 'B08134_010')
+tt_sv = 'B08134_001'
+tt <- get_many_variables(tt_variables, tt_sv)
+head(tt)
+
+# transporation mode
+tm_sv = 'B08301_001'
+tm_variables = c(tot_car = 'B08301_002',
+                tot_pubtran = 'B08301_010', 
+                tot_taxi = 'B08301_016',
+                tot_motorcycle = 'B08301_017',
+                tot_bike = 'B08301_018',
+                tot_walk = 'B08301_019',
+                tot_tm_other = 'B08301_020',
+                tot_wfh = 'B08301_021')
+
+tm = get_many_variables(tm_variables,tm_sv)
+head(tm)
+
+# social security income
+social_sv = 'B19055_001'
+social_variables = c(tot_social_y = 'B19055_002',
+                tot_social_n = 'B19055_003')
+social <- get_many_variables(social_variables, social_sv)
+head(social)
+
+# summplemental social security
+ssi_sv = 'B19057_001'
+ssi_variables = c(tot_ssi_y = 'B19056_002',
+                tot_ssi_n = 'B19056_003')
+ssi <- get_many_variables(ssi_variables, ssi_sv)
+head(ssi)
+
+# food stamps
+fs_sv = 'B19058_001'
+fs_variables = c(tot_fs_y = 'B19058_002',
+                tot_fs_n = 'B19058_003')
+fs <- get_many_variables(fs_variables,fs_sv)
+head(fs)
+
+# tenancy
+ten_sv = 'B25003_001'
+ten_variables = c(tot_own = 'B25003_002',
+                tot_rent = 'B25003_003')
+ten <- get_many_variables(ten_variables,ten_sv)
+head(ten)
+
+# tenancy - WHITE
+ten_white_sv = 'B25003A_001'
+ten_white_variables = c(tot_white_own = 'B25003A_002',
+                tot_white_rent = 'B25003A_003')
+ten_white <- get_many_variables(ten_white_variables,ten_white_sv)
+head(ten_white)
+
+# tenancy - Black
+ten_black_sv = 'B25003B_001'
+ten_black_variables = c(tot_black_own = 'B25003B_002',
+                tot_black_rent = 'B25003B_003')
+ten_black <- get_many_variables(ten_black_variables,ten_black_sv)
+head(ten_black)
+
+# tenancy - AIAN
+ten_AIAN_sv= 'B25003C_001'
+ten_AIAN_variables = c(tot_AIAN_own = 'B25003C_002',
+                tot_AIAN_rent ='B25003C_003')
+ten_AIAN <- get_many_variables(ten_AIAN_variables,ten_AIAN_sv)
+head(ten_AIAN)
+
+# tenancy - Asian
+ten_asian_sv = 'B25003D_001'
+ten_asian_variables = c(tot_asian_own = 'B25003D_002',
+                tot_asian_rent = 'B25003D_003')
+ten_asian <- get_many_variables(ten_asian_variables,ten_asian_sv)
+head(ten_asian)
+
+# tenancy - NHPI
+ten_NHPI_sv = 'B25003E_001'
+ten_NHPI_variables = c(tot_NHPI_own = 'B25003E_002',
+                tot_NHPI_rent = 'B25003E_003')
+ten_NHPI <- get_many_variables(ten_NHPI_variables,ten_NHPI_sv)
+head(ten_NHPI)
+
+# DO THE REST OF THE RACES 
+
+merged_many <- rbind(race, eth_race, eth_origin, tt, tm, social, ssi, fs, ten, ten_white, ten_black, ten_AIAN,ten_asian, ten_NHPI)
+dim(merged_many) #8234 x 7
+
+head(merged_many)
+
+merged_many_cl <- merged_many %>%
+  mutate(percentage  = 100 * (estimate / summary_est)) 
+
+head(merged_many_cl)
+
+# write csv
+write.csv(merged_many_cl, 'acs_summary_variables.csv', row.names = FALSE)
+```
+
+```{r}
+## Single variables 
+
+# pop 
+pop <- get_one_variable(c(tot_pop = 'B01003_001'))
+# head(pop)
+
+# median income
+med_inc <- get_one_variable(c(med_income = 'B19013_001'))
+head(med_inc)
+
+# average rent 
+avg_rent <- get_one_variable(c(avg_rent = 'B25064_001'))
+head(avg_rent)
+
+# Average rent as a percentage of income
+avg_rent_income = get_one_variable(c(avg_rent_perc_income = 'B25071_001'))
+head(avg_rent_income)
+
+# Merge
+merged_single <- rbind(pop, med_inc, avg_rent, avg_rent_income)
+dim(merged_single) #716   5
+
+# write csv
+#write.csv(merged_single, 'acs_single_variables.csv', row.names = FALSE)
+```
+
+```{r}
+### Merge ACS both together
+dem <- plyr::rbind.fill(merged_many_cl, merged_single)
+head(dem)
+dim(dem) # 8950, 8
+
+# write csv 
+#write.csv(dem, 'acs_demographic_variables.csv', row.names = FALSE)
+```
+
+```{r}
+### Convert to wide 
+dem <- read.csv('acs_demographic_variables.csv')
+head(dem)
+colnames(dem)
+
+dem_sm <- dem %>%
+  select(GEOID, NAME, variable, estimate, percentage)
+
+head(dem_sm)
+
+dem_wide <- pivot_wider(dem_sm, names_from = variable, values_from = c(percentage, estimate))
+
+head(dem_wide)
+
+# write.csv(dem_wide, 'acs_demographic_variables_wide.csv', row.names = FALSE)
+```
+
+
+```{r}
+# review parking data violation types
+df <- parking_sm
+head(df)
+dim(df)
+
+unique(df$VIOLATION_PROC_DESC)
+#unique(df$VIOLATION_CODE)
+
+df %>%
+  group_by(VIOLATION_CODE,VIOLATION_PROC_DESC) %>%
+  count()
+```
+
+```{r}
+# define broader categories based on manual review 
+dmv_related <- c("FAILURE TO DISPLAY CURRENT TAGS","NO REAR TAGS.","IMPROPER DISPLAY OF TAGS","FAILURE TO SECURE DC TAGS","OBSTRUCTED TAGS.",
+                 "FAIL TO SECURE TAGS IN THE DISTRICT OF COLUMBIA", 'FAIL TO CHANGE ADDRESS OF VEHICLE REGISTRATION', 
+                 'IMPROPERLY DISPLAYED TAGS', 'OBSTRUCTED TAGS.', 'FAIL TO DISPLAY CURRENT DC VEHICLE TAGS', 
+                 'FAIL TO PROPERLY DISPLAY INSPECTION STICKER SIGN', 'EXPIRED INSPECTION REJECTION STICKER', 'FAIL TO REPORT FOR INSPECTION.',
+                 'FAIL TO DISPLAY CURRENT INSPECTION STICKER', 'EXPIRED INSPECTION STICKER', 'NO FRONT TAGS.', 'NO REAR TAGS.', 
+                 'FAILURE TO DISPLAY CURRENT TAGS','FAILURE TO SECURE DC TAGS', 'FAIL TO SECURE TAGS IN THE DISTRICT OF COLUMBIA',
+                 'FAIL TO DISPLAY RECIPROCITY STICKER', 'FAIL TO PROPERLY AFFIX VALIDATION STICKERS', 'ILLEGIBLE TAGS.',
+                 'IMPROPER DISPLAY OF TAGS', 'FAILURE TO TRANSFER TITLE AS REQUIRED')
+
+other <- c('PARK ON OR UNDER AN ELEVATED STRUCTURE', 'EXCESSIVE IDLING.', 'PARK ON A LAWN', 
+           'PARK IN AN UNLIGHTED AREA (PARKING AREA)', 'NO SIGNAL DEVICE',
+           'PARK FOR PURPOSE OF VEHICLE SALE OR REPAIR', 'FAIL TO LOCK AND REMOVE KEY FROM IGNITION WHEN PKD', 'PARKING MISC', 
+           'MAKING NON EMERGENCY REPAIRS ON ROADWAY', 'RELOCATE TOW FEE',
+           'NO PARKING EXC. ELECTRIC VEHICLE BEING CHARGED', 'VEHICLE HAUL TRASH, DEBRIS OR JUNK', "MOTOR RUNNING UNATTENDED")
+
+taxi_related <- c('PARK ON TAXICAB STAND', 'TAXICAB FAIL TO USE CRUISING LIGHTS', 'TAXICAB LOITERING.', 'DRIVER MORE THAN FIVE FEET FROM TAXI',
+                  'TAXICAB PARKED OFF TAXI STAND', 'TAXICAB SOLICITING FARE', 'TAXICAB FAIL TO PULL TO CURB', 'TAXICAB UNLICENSED DC RESIDENT',
+                  'TAXICAB FAIL TO EXHIBIT LICENSE', 'TAXICAB LOADING PASSENGERS IN A CROSSWALK', 
+                  'TAXICAB FAIL TO HAVE DC TAXICAB COMMISSION LICENSE', 'TAXICAB FAIL TO DISPLAY PROPER INSIGNIA', 
+                  'TAXICAB FAIL TO HAVE INSURANCE STICKER', 'PERMIT UNLICENSED HACKER', 'NON-TAXI ON HACK STAND', 
+                  'IMPROPERLY USING A TAXICAB OR LIMOUSINE STAND (PRI')
+
+blocking_all <- c('PARK IN A BUS ZONE','OBSTRUCTING CROSSWALK','OBSTRUCT AN INTERSECTION','PARK ON SIDEWALK OR AREA RESERVED FOR PEDESTRIANS',
+                   'PARK IN A FIRE LANE', 'PARKING ON SNOW EMERGENCY ROUTE WHEN PROHIBITED', 'PARK TOO CLOSE APPROACHING INTERSECTION', 
+                   'PARK IN A CURB LOADING ZONE', 'STAND OR PARK IN ALLEY', 'PARK VEHICLE IN FRONT OF A BARRICADE', 
+                  'OBSTRUCTING ENTRANCE OF PKG GARAGE, DOOR OR GATE', 'OBSTRUCTING FIRE ESCAPE','UNAUTHORIZED VEHICLE IN LOADING ZONE', 
+                  'PARK IN A DESIGNATED ENTRANCE', 'PARK IN A CURB LOADING ZONE', 'PARK ON MEDIAN, ISLAND, OR SAFETY ZONE', 
+                  'PARK AT CURB IN LOADING ZONE', 'PARK BETWEEN ISLAND OR SAFETY ZONE', 'PARK IN BUS STOP OR ZONE DURING RUSH HOUR',
+                  'PARKED IN DRIVEWAY OR ALLEY TO OBSTRUCT SIDEWALK', 'STOPPING, STANDING OR PARKING VEHICLE IN BIKE LANE', 
+                  'VEH >15 PASS, PUBLIC ST FRT DWELLING, SCH, HOSP,', "VEHICLE > 22' PUBLIC ST FRT DWELLING,SCHOOL, HOSP", 
+                  "VEH > 8' WIDE PUBLIC ST, FRT DWELLING, SCHOOL,HOSP", 'TRAILER, FRT DWELLING, SCHOOL, HOSPITAL', 
+                  'STREETCAR-PARK, STOP STAND VEH GUIDEWAY/PLATFORM', 'BUS LANE, UNAUTHORIZED VEHICLE PARKED IN',
+                  'OPP OR BESIDE CONTRUCTION SITE OBSTRUCTING TRAFFIC', 'PARK IN MEDIAN, ISLAND, OR SAFETY ZONE', 
+                  "STREETCAR-PARK, STOP  STAND VEH  GUIDEWAY/PLATFORM", "VEHICLE > 22'  PUBLIC ST FRT DWELLING,SCHOOL, HOSP")
+
+commercial_related <- c('OVERSIZED COMM VEHICLE PARKED AT A METER', 'COMM VEH MORE THAN 22 FEET IN FRONT OF RESIDENCE', 
+                        'NO STANDING COMMERCIAL VEHICLE', 'LENGTH OVER 40 FEET / 55 FEET', 'LOADS NOT SECURED', 'LOAD EXTENDS OVER FENDER',
+                        'FAIL TO REGISTER APPORTIONABLE VEHICLE UNDER IRP', 'FAIL TO OBTAIN IRP TRIP PERMIT', 
+                        'EXCEED GROSS WEIGHT INDICATED ON IRP REGISTRATION', 'MOTOR CARRIER DRIVER VIOLATION OUT OF SERVICE',
+                        'MOTOR CARRIER VEHICLE VIOLATION OUT OF SERVICE', 'COMMERCIAL MOTOR VEHICLE - OUT OF SERVICE', 
+                        'COMMERCIAL MOTOR VEHICLE - NOT OUT OF SERVICE', 'COMMERCIAL PMT PARK DECAL, FAIL DISPLAY PROPERLY',
+                        'COMMERICAL PEMIT PARK DAY PASS, FAIL TO DISPLAY', 'CMV- NON LOAD ZONE METER SPACE PROHIBITED TIMES',
+                        'CMV- NON LOAD ZONE METER W/O ANNUAL OR DAY PASS', 'CMV- LOADING ZONE W/O ANNUAL OR DAY PASS',
+                        'LOADING ZONE, OVERTIME PARKING BY CMV VALID DECAL', 'UNAUTHORIZED USE OF SPECIAL PERMIT OR TAG (HP)',
+                        "CMV- NON LOAD ZONE  METER SPACE PROHIBITED  TIMES", "COMMERICAL PEMIT PARK DAY PASS, FAIL  TO DISPLAY",
+                        "UNAUTHORIZED USE OF SPECIAL PERMIT OR TAG  (HP)")
+
+meter_related <- c('DEPOSIT PAYMENT TO EXTEND TIME BEYOND METER LIMIT', 'METER, FAIL TO DEPOSIT PAYMENT','NOT PARKED IN A METER SPACE',
+                   'PARK OVERTIME AT A METER','PARK AT EXPIRED METER', 'EXPIRED HANDICAP METER', 
+                   'FAIL TO DISPLAY MULTI-SPACE METER RECEIPT PROPERLY', 'OVERTIME PARKING IN A LOADING ZONE METER SPACE',
+                   'EXPIRATION TIME ON METER RECEIPT LAPSED', 'FAIL TO DISPLAY A MULTISPACE METER RECEIPT', 
+                   'EXPIRED MULTISPACE METER RECEIPT IN LOADING ZONE', 'FAIL TO DISPLAY METER RECEIPT IN A LOADING ZONE', 
+                   'OVERTIME AT A MULTISPACE METER IN A LOADING ZONE', 'FAIL TO DISPLAY MULTI-SPACE PARKING METER RCPT BZ',
+                   'FAILURE TO DISPLAY MULI-SPACE RECEIPT PROPERLY BZ', 'FAIL DISPLAY MULTI SPACE RECEIPT PROPERLY BE',
+                   'NOT PARKED IN PARKING METER SPACE BZ', 'DISPLAY METER RECEIPT FROM MTR OUTSIDE AREA BE', 
+                   'NOT PARKED IN PARKING METER SPACE BE', 'OBTAIN ADD METER RCPT FOR VEH TO EXTEND TIME BZ', 
+                   'OVERSIZED VEHICLE AT METER BZ', 'OVERTIME AT METER BZ', 'EXPIRATION TIME ON METER RECEIPT LAPSED BE',
+                   "OBTAIN ADD METER RCPT FOR VEH TO EXTEND TIME  BZ", "NOT PARKED IN PARKING METER SPACE  BE")
+
+no_parking_signage <- c('DISOBEYING OFFICIAL SIGN', 'EMERGENCY NO PARKING', 'PARK IN AN UNDESIGNATED SPACE', 'NO PARKING ANYTIME', 
+             'NO STANDING ANYTIME', 'NO STOPPING OR STANDING ANYTIME', 'NO STOPPING ANYTIME', 
+             'PARK IN RESERVED SPACE FOR MOTORCYCLES ONLY', 'PARK OVERTIME IN TIMED ZONE', 'VALET PARKING/STAGING ZONE', 
+             'PASSENGER LOADING ZONE')
+
+time_limited <- c('NO PARKING 7 AM TO 6:30 PM', 'NO PARKING SPECIFIC HOURS', 'NO STOPPING OR STANDING IN AM RUSH HOUR ZONE',
+                  'NO STOPPING OR STANDING IN PM RUSH HOUR ZONE', 'NO PARKING STREET CLEANING')
+
+parking_location_length <- c('PARK MORE THAN 12 INCHES FROM CURB', 'PARK WITHIN 5 FEET OF DRIVEWAY OR ALLEY', 
+                      'PARK WITHIN 20 FEET OF A FIREHOUSE ENTRANCE', 'PARK WITHIN 10 FEET OF A FIRE HYDRANT', 
+                      'PARK LESS THAN 25 FEET FROM AN INTERSECTION','PARK LESS THAN 40 FEET FROM AN INTERSECTION', 
+                      'PARK TO REDUCE ROADWAY TO LESS THAN 10 FEET', 'PARKED WITHIN 25 FEET OF A STOP SIGN', 
+                      'PARKED LESS THAN 3 FEET FROM ANOTHER VEHICLE', 'PARK WITHIN 20 FEET OF A BUS STOP OR ZONE',
+                      'PARK TOO CLOSE APPROACHING INTERSECTION', 'PARK WITHIN 25 FEET OF A MAILBOX', 
+                      'PARK WITHIN FIFTY FEET OF A RAILROAD CROSSING', 'PARK WITHIN TWENTY FIVE FEET FROM A YIELD SIGN')
+
+ball_park_related <- c('METER BALL PARK EVENT, DEPOSIT ADDITONAL PAYMENT','ILLEGAL AT METER BALL PARK EVENT',
+                       'METER BALL PARK EVENT, FAIL TO DEPOSIT PAYMENT', 'FAIL TO DISPLAY MULTI SPACE RECEIPT BALLPARKEVENT',
+                       'OVERSIZED VEHICLE AT METER BALL PARK EVENT', 'OVERTIME BALL PARK EVENT', 
+                       'RESIDENTIAL PMT PKG BALLPARK ZONE 2ND OFF CAL YR', 'RPP BALLPARK ZONE 3RD OFFENSE CALENDAR YEAR',
+                       'OVERTIME AT METER BALLPARK EVENT', 'RPP FAIL TO REMOVE EXPIRED STICKER BALL PARK ZONE', 
+                       'RPP FAIL TO REMOVE EXPIRED STICKER BALLPARK EVENTS', "RESIDENTIAL PMT PKG  BALLPARK ZONE 2ND OFF CAL YR",
+                       "FAIL TO DISPLAY MULTI SPACE RECEIPT  BALLPARKEVENT")
+
+property_type <- c('PARK ON PRIVATE OR PUBLIC PROPERTY', 'PARK ON PUBLIC SPACE', 'PARK IN RESERVED EMBASSY SPACE', 'PARK IN SCHOOL ZONE',
+                   'PARKED ON DESIGNATED VENDOR AREA', 'PARKED IN A RESERVED CAR SHARING SPACE', 'GOVERNMENT VEHICLE PARKING ONLY', 
+                   'VEHICLE ON PRIVATE/PUBLIC PROPERTY WITHOUT CONSENT', 'VEHICLE ON PRIVATE/PUBLIC PROP W/O CONSENT 2D OFF',
+                   'PARK IN RESERVED SPACE', 'PARK ON SIGHTSEEING STAND', "VEHICLE ON PRIVATE/PUBLIC PROP W/O  CONSENT 2D OFF")
+
+disabilities <- c('RESERVED RESIDENTIAL SPACE PERSONS W/ DISABILTIES', 'INDIVID W/ DISABILITIES ONLY UNAUTH. USE RSRVD SP', 
+                  'IND. W/ DISABILITIES METER NO PROOF OF PAYMENT', 'IND. W/ DISABILITIES AMOUNT OF PAYMENT HAS LAPSED',
+                  'IND. W/ DISABILITIES PARKED BEYOND TIME LIMIT', 'VENDING USING IND. W/ DISABILITIES PARK PRIVILEGES',
+                 'UNAUTHORIZED USE IND. W/ DISABILITIES PARK PRIV', 'UNAUTHORIZED USE IND. W/ DISABILITIES PARK PRIV',
+                 "UNAUTHORIZED  USE IND. W/ DISABILITIES PARK PRIV", "IND. W/ DISABILITIES METER  NO PROOF OF PAYMENT")
+
+parking_format <- c('PARK WITH LEFT WHEEL TO THE CURB','FAIL TO PARK PARALLEL', 'FAIL TO TURN WHEEL TO CURB.', 'FAIL TO SET EMERGENCY BRAKE',
+                    'PARK ABREAST OF ANOTHER VEHICLE')
+
+permit <- c('RESIDENTIAL PERMIT PKING BEYOND LIMIT W/O PERMIT', 'PARK IN OFFICIAL PARKING PERMIT ONLY SPACE', 
+            'FORGED TEMPORARY PARKING PLACARD', 'FORGED/COUNTERFEIT VISITOR PARKING PERMIT', 
+            'PROVIDE FALSE INFO TO OBTAIN TEMP PARKING PLACARD', 'PROVIDE FALSE INFO TO OBTAIN VISITOR PARKING PERM',
+            'FAIL TO DISPLAY RESIDENTIAL PARKING PERMIT', 'FAIL TO REMOVE EXPIRED RESIDENTIAL PARKING PERMIT', 
+            'RESIDENTIAL PMT PKG 2ND OFFENSE CALENDAR YEAR', 'RESIDENTIAL PMT PKG 3RD OFFENSE CALENDAR YEAR',
+            'RPP BEYOND 2 HOUR PERIOD W/O VALID PERMIT BE', 'RPP BEYOND 2 HOUR PERIOD W/O VALID PERMIT BZ', 
+            'RPP IMPROPER USE OF VISITOR PERMIT BZ', 'RPP IMPROPER USE OF VISITOR PERMIT BE', 'RPP FAIL TO PROPERLY DISPLAY CURRENT STICKER BZ',
+            'RPP FAIL TO PROPERLY DISPLAY CURRENT STICKER BE', "FORGED/COUNTERFEIT  VISITOR PARKING PERMIT",
+            "RPP FAIL TO PROPERLY DISPLAY CURRENT STICKER  BZ", "RPP FAIL TO PROPERLY DISPLAY CURRENT STICKER  BE")
+
+car_condition <- c('DEFECTIVE MUFFLER.', 'UNSAFE MECHANICAL CONDITION', 'USE OF HIGH BEAM LIGHTS', 'USE OF IMPROPER LIGHTS',
+                   'NO REAR LIGHTS.', 'ONE RUNNING HEAD LIGHT', 'NO REAR VIEW MIRROR', 'NO OR DISCONNECTED MUFFLER', 'UNSAFE TIRES',
+                   'TINTED WINDOWS', 'TINTED WINDOWS , FAIL TO COMPLY 1ST')
+
+abandoned_dangerous <- c('ABANDON VEHICLE ON PUBLIC/PRIVATE PROPERTY VIOL 1', 'ABANDON VEHICLE ON PUBLIC/PRIVATE PROPERTY VIOL 2', 
+               'ABANDON VEHICLE ON PUBLIC/PRIVATE PROPERTY VIOL 3', 'ABANDON VEH PRIV/PUBLIC PROP SOLID WASTE/RAT', 
+               'ABANDON VEH PRIV/PUBLIC PROP SOLID WASTE/RAT', 'ABANDON VEH PRIV/PUBLIC PROP SOLID WASTE/RAT',
+               'DANGEROUS VEHICLE ON PRIV/PUBLIC PROP VIOL 1', 'DANGEROUS VEHICLE ON PRIV/PUBLIC PROP VIOL 2', 
+               'DANGEROUS VEHICLE ON PRIV/PUBLIC PROP VIOL 3', 'DANGEROUS VEH ON PRIV/PUBLIC PROP S/W VIOL 1', 
+               'DANGEROUS VEH ON PRIV/PUBLIC PROP S/W VIOL 2', 'DANGEROUS VEH ON PRIV/PUBLIC PROP S/W VIOL 3')
+
+# P322	PARK OVERTIME IN TIMED ZONE
+
+```
+
+```{r}
+# add column for simplified violation
+
+#df$VIOLATION_PROC_DESC
+
+#any(grepl("a",list2))
+
+#df$violation_type_sm <- ifelse(any(grepl(df$VIOLATION_PROC_DESC, dmv_related)), 'DMV RELATED', 'CHECK')
+
+df_test <-  df %>%
+  mutate(violation_type_simple = case_when(
+    VIOLATION_PROC_DESC %in% dmv_related ~ 'DMV RELATED',
+    VIOLATION_PROC_DESC %in% taxi_related ~ 'TAXI RELATED',
+    VIOLATION_PROC_DESC %in% blocking_all ~ 'BLOCKING VIOLATION',
+    VIOLATION_PROC_DESC %in% commercial_related ~ 'COMMERCIAL RELATED',
+    VIOLATION_PROC_DESC %in% meter_related ~ 'METER RELATED',
+    VIOLATION_PROC_DESC %in% no_parking_signage ~ 'SIGNAGE RELATED',
+    VIOLATION_PROC_DESC %in% time_limited ~ 'TIME RELATED',
+    VIOLATION_PROC_DESC %in% parking_location_length ~ 'DISTANCE RELATED',
+    VIOLATION_PROC_DESC %in% ball_park_related ~ 'BALL PARK RELATED',
+    VIOLATION_PROC_DESC %in% property_type ~ 'TYPE OF PROPERTY RELATED',
+    VIOLATION_PROC_DESC %in% disabilities ~ 'DISABILITY RELATED',
+    VIOLATION_PROC_DESC %in% parking_format ~ 'PARKING TECHNIQUE RELATED',
+    VIOLATION_PROC_DESC %in% permit ~ 'PERMIT RELATED',
+    VIOLATION_PROC_DESC %in% car_condition ~ 'CAR CONDITION',
+    VIOLATION_PROC_DESC %in% abandoned_dangerous ~ 'ABANDONED OR DANGEROUS VEHICLE',
+    VIOLATION_PROC_DESC %in% other ~ 'OTHER VIOLATION',
+    TRUE ~ 'NO DESCRIPTION'))
+
+head(df_test)
+
+# check <- df_test %>%
+#    filter(df_test$violation_type_simple == 'CHECK')
+# unique(check$VIOLATION_PROC_DESC)
+
+df_test %>%
+  group_by(violation_type_simple) %>%
+  count()
+
+# write csv
+write.csv(df_test, 'parking_clean_2019_final.csv', row.names = FALSE)
+```
+
+```{r}
+# descriptive statistics
+final_df <- read.csv('parking_clean_2019_final.csv')
+head(final_df)
+dim(final_df)
+length(unique(final_df$VIOLATION_PROC_DESC))
+length(unique(final_df$violation_type_simple))
+table(final_df$day_of_week)
+table(final_df$quad)
+mean(final_df$FINE_AMOUNT)
+summary(final_df$FINE_AMOUNT)
+```
