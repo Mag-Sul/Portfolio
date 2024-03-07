@@ -72,7 +72,7 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 
 *Techniques*: custom visualization themes using `ggplot`
 
-- [tutorial.qmd]()
+- [tutorial.qmd](https://github.com/Mag-Sul/Portfolio/blob/main/data_visualizations/How%20to%20Stop%20Recreating%20the%20Wheel/tutorial.qmd)
 
 ### Class Assignments (Python): 
 
