@@ -29,7 +29,7 @@ I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Geor
 
 *Summary:* Much data and research exists about factors influencing the number of women in national politics globally but there is little understanding of these same elements at the local level. In my project, I examine which social, economic, and political factors are most relevant to predicting higher proportions of women candidates for local office in the United States. I employ a gender guessing package on candidate-level precinct returns from the 2018 elections and combine the resulting data with county-level factors related to demography, economics, election history, and reproductive healthcare. My resulting dataset provides one of the most conclusively available datasets on women running for local office in the U.S. Read the final report [here](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Real%20Life%20Leslie%20Knopes/Real%20Life%20Leslie%20Knopes_%20Factors%20Contributing%20to%20the%20Proportion%20of%20Women%20Candidates%20for%20Local%20Office%20in%20the%20United%20States%20-%20Sullivan.pdf). 
 
-*Techniques:* Least Absolute Shrinkage and Selection Operator (LASSO) regression and random forests. 
+*Techniques:* Least Absolute Shrinkage and Selection Operator (LASSO) regression, random forests, handling unbalanced datasets
 
 - [01_data_cleaning_local_data.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Real%20Life%20Leslie%20Knopes/01_data_cleaning_local_data.ipynb)
 - [02_data_cleaning_demographic.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Real%20Life%20Leslie%20Knopes/02_data_cleaning_demographic.ipynb)
