@@ -7,17 +7,41 @@
 
 ### :woman_technologist: About Me:
 
-I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Georgetown University in Washington, DC. I'm also an experienced international relations professional focused on program management and communications. I'm currently open to opportunities where data science and public interest intersect. See below for examples of my work!
+I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Georgetown University in Washington, DC. I'm also a public policy professional with experience in program management and communications with the federal government. I'm currently open to opportunities where data science and public interest intersect. See below for examples of my work!
+
+*Jump to a section:*
+- [Professional Research](#professional-research-python)
+- [Academic Research](#academic-research-python-and-r)
+- [Data Visualization Projects](#data-visualization-projects)
+- [Class Assignments](#class-assignments-python)
+- [How to Reach Me](#how-to-reach-me)
 
 ---
 
-### Class Research (Python and R):
+### Professional Research (Python)
+
+:file_folder: **[Massive Data Institute](https://mdi.georgetown.edu/)**
+
+*Summary:* I am working with [Dr. Rebecca Johnson](https://gufaculty360.georgetown.edu/s/contact/0031Q00002YIzT3QAL/rebecca-johnson) to develop a first-of-its-kind database of school board video transcripts for public policy analysis of education inequalities at the local level. Responsibilities included cleaning and compiling 10 years of directory and demographic data from the National Center for Education Statistics and testing regex and Large Language Model (LLM) methods to clean and extract public comments from transcripts. Also with MDI, I collaboratively developed an interactive tool in Python to automate the data collection process and replicate the the excel-based funding allocation formula for the Deparment of Health and Human Services – Low Income Home Energy Assistance Program (LIHEAP). I helped develop and refine a detailed user guide for the tool and trained HHS staff (not versed in Python) on tool usage. See the poster presentations for these projects below: 
+- [DistrictView: Exploring Methods for Isolating Public Comments in School Board Meetings](https://drive.google.com/file/d/1BWgDO9QzlGxqzhVlXfyL6sRPzkmoTbKw/view?usp=sharing), Spring 2024
+- [DistrictView: Building a First-of-Its-Kind Databse of U.S. School Board Meeting Transcripts](https://mdi.georgetown.edu/posters/corrina-calanoc-24-and-maggie-sullivan-24-mdi-scholars-fall-2023-research-showcase-poster/), Fall 2023
+- [Supporting Efficient Federal Program Operations: Automating the LIHEAP FUnding Formula](https://mdi.georgetown.edu/posters/alia-abdelkader-23-caroline-adams-23-and-maggie-sullivan-24-mdi-scholars-spring-2023-research-showcase-poster/), Spring 2023
+
+*Techniques:* Webscraping (`Selenium`), Data Wrangling, Pipeline Production, LLM Testing
+
+:file_folder: **[Beeck Center for Social Impact + Innovation](https://beeckcenter.georgetown.edu/)** <br>
+
+*Summary:* Each year, the “State of the State" speech is a governor’s prime opportunity to outline their top priorities to the public. To understand governor priorities in 2023, I analyzed all 50 State of the State addresses (or the equivalent annual budget address or inaugural speech) and dove deeper into governor’s priorities by analyzing a year’s worth of press releases for the 13 states that have participated in the Data Labs program with the Beeck Center. I found that governors across the country are focused most on issues related to housing and homelessness, energy policy, and taxes. See the public GitHub repository for this project [here](https://github.com/beeckcenter/state_of_the_states_2023). My blog post with accompanying infographics will be published in May on the Beeck Center website. 
+
+*Techniques:* Webscraping (`BeautifulSoup` and `Selenium`), TF-IDF, Principal Component Analysis (PCA), Data Visualization
+
+### Academic Research (Python and R):
 
 📘 **Data Science III: Just Jargon or Policy Priorities? Text Analysis of Secretary of State Remarks for the Biden and Trump Administrations (Python)**
 
 *Summary:* Public affairs materials point to both policy priorities and how we talk about those policy priorities. This is particularly relevant when comparing the priorities of presidential administrations from different political parties. I scraped 1,973 public remarks from the Office of the Secretary of State websites for the current U.S. Secretary of State Antony Blinken (Biden Administration) and his predecessor, Secretary Michael Pompeo (Trump Administration). I then conducted both exploratory and predictive analysis on these documents to understand how government public affairs materials do or do not reveal key facts about U.S. foreign policy, particularly for changes between administrations of different political parties. I found that these public remarks revealed both diplomatic "business as usual" reveal both and key policy priorities under each administration. Read the final report [here](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Just%20Jargon%20or%20Policy%20Priorities/final_paper_ds3_mes440.pdf). 
 
-*Techniques:* Webscraping (`beautifulsoup` and `requests`), TF-IDF, Principal Component Analysis (PCA), Naive Bayes, K-Nearest Neighbors (KNN), Decision Trees/Random Forest
+*Techniques:* Webscraping (`BeautifulSoup` and `Requests`), TF-IDF, Principal Component Analysis (PCA), Naive Bayes, K-Nearest Neighbors (KNN), Decision Trees/Random Forest
 
 - [01_scrape_blinken.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Just%20Jargon%20or%20Policy%20Priorities/01_scrape_blinken.ipynb)
 - [02_scrape_pompeo.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/class_research/Just%20Jargon%20or%20Policy%20Priorities/02_scrape_pompeo.ipynb)
