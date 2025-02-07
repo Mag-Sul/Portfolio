@@ -7,7 +7,7 @@
 
 ### :woman_technologist: About Me:
 
-I'm a graduate student pursuing a M.S. in Data Science and Public Policy at Georgetown University in Washington, DC. I'm also a public policy professional with experience in program management and communications with the federal government. I'm currently open to opportunities where data science and public interest intersect. See below for examples of my work!
+I'm a Data Scientist with the [U.S. Digital Corps](https://digitalcorps.gsa.gov/) with an M.S. in Data Science and Public Policy from Georgetown University. I'm also a public policy professional with experience in program management and communications with the federal government. I'm currently open to opportunities where data science and public interest intersect. See below for examples of my work!
 
 *Jump to a section:*
 - [Professional Research](#professional-research-python)
