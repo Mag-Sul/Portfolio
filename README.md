@@ -135,6 +135,6 @@ I'm a Data Scientist with the [U.S. Digital Corps](https://digitalcorps.gsa.gov/
 ---
 ### How to reach me:
 
-:mailbox_with_mail: [mes440@georgetown.edu](mailto:mes440@georgetown.edu?subject=[GitHub]%20Source%20Han%20Sans)
+:mailbox_with_mail: [maggie.sullivan.111@gmail.com](mailto:maggie.sullivan.111@gmail.comu?subject=[GitHub]%20Source%20Han%20Sans)
 
 [![Linkedin Badge](https://img.shields.io/badge/-Maggie-blue?style=flat&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/mes440/)
