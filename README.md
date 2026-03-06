@@ -7,13 +7,12 @@
 
 ### :woman_technologist: About Me:
 
-I'm a Data Scientist with the [U.S. Digital Corps](https://digitalcorps.gsa.gov/) with an M.S. in Data Science and Public Policy from Georgetown University. I'm also a public policy professional with experience in project management and strategic communications with the federal government. I'm currently open to opportunities across the data science spectrum (data engineering, machine learning, data visualization). See below for examples of my work!
+I'm passionate about leveraging my data expertise and cross-functional skills for mission-oriented organizations. I consider myself a "data professional" with technical skills applicable at every stage of the data pipeline, including <b>*data engineering, analytics engineering, data science, machine learning, data analysis, and business intelligence*</b>. I currently lead product analytics for an education and career exploration company, tailoring product usage data to strengthen go-to-market strategies. Prior to this role, I  served as a Data Scientist with the [U.S. Digital Corps](https://digitalcorps.gsa.gov/) and graduated with my M.S. in Data Science and Public Policy from Georgetown University. I'm also a policy professional with experience in project management and strategic communications with the federal government. See below for examples of my data work!
 
 *Jump to a section:*
 - [Professional Research](#professional-research-python)
 - [Academic Research](#academic-research-python-and-r)
 - [Data Visualization Projects](#data-visualization-projects)
-- [Class Assignments](#class-assignments-python)
 - [How to Reach Me](#how-to-reach-me)
 
 ---
@@ -99,42 +98,10 @@ I'm a Data Scientist with the [U.S. Digital Corps](https://digitalcorps.gsa.gov/
 *Techniques*: custom visualization themes using `ggplot`
 
 - [tutorial.qmd](https://github.com/Mag-Sul/Portfolio/blob/main/data_visualizations/How%20to%20Stop%20Recreating%20the%20Wheel/tutorial.qmd)
-
----
-
-### Class Assignments (Python): 
-
-*(posted with permission from my Data Science professor)*
-
-:green_book: [00_python_basics.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/code/00_python_basics.ipynb)
-- python lists
-- numpy arrays
-- basic list comprehension
-
-:green_book: [01_criminal_justice_data.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/code/01_criminal_justice_data.ipynb)
-- recoding variables using np.select and np.where
-- aggregation using groupby and agg
-- user-defined function to find matches within a broader pool of data
-- using list comprehension to apply a function iteratively over list elements
-
-:green_book: [02_guestworker_violations.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/code/02_guestworker_violations.ipynb)
-- pivot from long to wide
-- filter out duplicate data 
-- merging 
-- targeted regex
-
-:green_book: [03_doj_press_releases.ipynb](https://github.com/Mag-Sul/Portfolio/blob/main/code/03_doj_press_releases.ipynb)
-- tagging and sentiment scoring
-- part of speech tagging
-- named entity recognition
-- sentiment analysis
-- topic modeling
-- estimate a topic model using preprocessed words
-- extend the analysis from unigrams to bigrams
-
+  
 ---
 ### How to reach me:
 
 :mailbox_with_mail: [maggie.sullivan.111@gmail.com](mailto:maggie.sullivan.111@gmail.comu?subject=[GitHub]%20Source%20Han%20Sans)
 
-[![Linkedin Badge](https://img.shields.io/badge/-Maggie-blue?style=flat&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/mes440/)
+[![Linkedin Badge](https://img.shields.io/badge/-LinkedIn-blue?style=flat&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/mes440/)
